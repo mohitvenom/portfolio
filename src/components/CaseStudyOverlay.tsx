@@ -88,6 +88,7 @@ export default function CaseStudyOverlay({ id, onClose }: CaseStudyOverlayProps)
           exit={{ opacity: 0, y: 40, scale: 0.95 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="panel"
+          data-lenis-prevent="true"
           style={{
             position: 'relative',
             width: '100%',
