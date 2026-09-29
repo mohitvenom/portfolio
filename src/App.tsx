@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy, useRef } from 'react';
 import Lenis from 'lenis';
 import { frame, cancelFrame } from 'motion';
 import { LazyMotion, domAnimation } from 'motion/react';
@@ -12,6 +12,31 @@ import { StyleGuide } from './components/StyleGuide';
 
 const CaseStudyOverlay = lazy(() => import('./components/CaseStudyOverlay'));
 import './index.css';
+
+function LazyRender({ children, minHeight = "100vh" }: { children: React.ReactNode, minHeight?: string }) {
+  const [shouldRender, setShouldRender] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShouldRender(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "300px 0px" });
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={{ minHeight: shouldRender ? 'auto' : minHeight, contentVisibility: shouldRender ? 'visible' : 'auto' }}>
+      {shouldRender ? children : null}
+    </div>
+  );
+}
 
 function App() {
   useEffect(() => {
@@ -77,9 +102,15 @@ function App() {
         {currentHash === '#/styleguide' ? <StyleGuide /> : (
           <>
             <Hero />
-            <Projects />
-            <SkillsAndExperience />
-            <ContactTerminal />
+            <LazyRender minHeight="100vh">
+              <Projects />
+            </LazyRender>
+            <LazyRender minHeight="100vh">
+              <SkillsAndExperience />
+            </LazyRender>
+            <LazyRender minHeight="100vh">
+              <ContactTerminal />
+            </LazyRender>
           </>
         )}
       </main>

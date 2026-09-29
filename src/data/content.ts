@@ -20,7 +20,7 @@ export const content = {
       title: "Inventory Intel Agent",
       type: "Flagship",
       category: "Agents",
-      description: "Built an intelligent agent to process and analyze inventory data, providing actionable insights for business scaling.",
+      description: "Built an autonomous agent that monitors marketplace prices and stock, then alerts on Slack for drops, restocks and stockouts.",
       metrics: [
         { label: "Products tracked", value: "7" },
         { label: "Marketplaces live", value: "3 (Amazon, Ubuy, eBay)" },
@@ -40,8 +40,7 @@ export const content = {
         hardProblems: "Issue: Walmart scraping was blocked entirely. Root Cause: Walmart's PerimeterX anti-bot system flagged every approach tried — plain requests, cloudscraper, even browser automation — on IP reputation alone. Fix: Rather than force a fragile workaround, documented it as a known limitation and shipped without Walmart support, prioritizing a working system over fake coverage.",
         outcome: "7 products tracked across 4 marketplaces — Amazon, Ubuy and eBay live; Walmart evaluated and documented as a known limitation. 75% test coverage on core decision logic. 6+ real bugs found and fixed during hardening.",
         links: [
-          { text: "GitHub", url: "https://github.com/mohitvenom/inventory_intel_engine" },
-          { text: "Demo video", url: "[ADD DEMO LINK]" }
+          { text: "GitHub", url: "https://github.com/mohitvenom/inventory_intel_engine" }
         ]
       }
     },
@@ -50,7 +49,7 @@ export const content = {
       title: "ForgeAI",
       type: "Flagship",
       category: "ML",
-      description: "Built a comprehensive AI development platform bridging prompt engineering with scalable deployment architectures.",
+      description: "Built an agent that turns a natural-language task into a tested, committed pull request through a sandboxed plan-code-test-review workflow.",
       metrics: [],
       tech: ["Python", "FastAPI", "Pydantic", "LLMs", "GitHub API", "Pytest"],
       featured: true,
@@ -63,8 +62,7 @@ export const content = {
         hardProblems: "Issue: During real end-to-end testing, the agent repeatedly consumed 2 to 3K input tokens while producing only about 57 output tokens, eventually failing with 'Iteration budget exceeded.' Root Cause: Traced to the CodingAgent — the LLM router was returning both native tool calls and a JSON CodingDecision in the same response, but the agent discarded the decision whenever tool calls were present, preventing the IMPLEMENTING to VALIDATING transition and causing the loop to repeat. Fix: Corrected the response-handling logic and added regression tests; the focused CodingAgent/SSE test suite passed 22 of 22.",
         outcome: "Built an end-to-end autonomous software-engineering workflow that understands a task, inspects a repository, plans changes, generates/modifies code, runs validation, diagnoses and repairs failures, reviews the result, and creates a Git checkpoint. Includes a React dashboard with live SSE execution events, execution history, workspace/settings views, and retry support. A real end-to-end test created a file with requested content and committed the change to Git.",
         links: [
-          { text: "GitHub", url: "https://github.com/mohitvenom/SWA_task" },
-          { text: "Demo video", url: "[ADD DEMO LINK]" }
+          { text: "GitHub", url: "https://github.com/mohitvenom/SWA_task" }
         ]
       }
     },
@@ -73,9 +71,9 @@ export const content = {
       title: "Content Generation Tool",
       type: "Flagship",
       category: "Agents",
-      description: "Built a specialized multi-agent workflow to automate digital marketing content generation at scale.",
+      description: "Built a two-stage retrieval-and-rewrite pipeline that researches and drafts SEO content for category, brand and blog pages.",
       metrics: [],
-      tech: ["Python", "FastAPI", "LangGraph", "OpenAI API", "SerpAPI", "PostgreSQL", "LLMs", "BM25", "bi-encoder/cross-encoder re-ranking", "asynchronous pipeline batching"],
+      tech: ["Python", "FastAPI", "GPT-4o-mini", "SerpAPI", "PRAW", "YouTube Data API", "BM25", "bi-encoder/cross-encoder re-ranking", "asynchronous pipeline batching"],
       featured: true,
       caseStudy: {
         problem: "SEO content for category, brand and blog pages needs research from several sources before writing.",
@@ -205,8 +203,7 @@ export const content = {
       role: "AI Engineer",
       company: "Ubuy Technologies",
       period: "Jan 2026 to present",
-      description: "Embedded in the digital marketing team. [ADD: what I built as an AI Engineer]",
-      sharedText: "Built internal tools including a content generation tool, SEO automation tool, keyword research tool, Google indexing tool, and Chrome extensions for task automation and scraping.",
+      description: "AI Engineer, embedded in the digital marketing team.",
       projects: []
     },
     {
@@ -214,7 +211,7 @@ export const content = {
       role: "AI Intern",
       company: "Ubuy Technologies",
       period: "Sept to Dec 2025",
-      description: "[ADD: what I built as an intern]",
+      description: "AI Intern, embedded in the digital marketing team.",
       projects: []
     },
     {
