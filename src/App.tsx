@@ -13,7 +13,7 @@ import { StyleGuide } from './components/StyleGuide';
 const CaseStudyOverlay = lazy(() => import('./components/CaseStudyOverlay'));
 import './index.css';
 
-function LazyRender({ children, minHeight = "100vh" }: { children: React.ReactNode, minHeight?: string }) {
+function LazyRender({ children, minHeight = "100vh", id }: { children: React.ReactNode, minHeight?: string, id?: string }) {
   const [shouldRender, setShouldRender] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -32,7 +32,7 @@ function LazyRender({ children, minHeight = "100vh" }: { children: React.ReactNo
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: shouldRender ? 'auto' : minHeight, contentVisibility: shouldRender ? 'visible' : 'auto' }}>
+    <div id={id} ref={ref} style={{ minHeight: shouldRender ? 'auto' : minHeight, contentVisibility: shouldRender ? 'visible' : 'auto' }}>
       {shouldRender ? children : null}
     </div>
   );
@@ -102,13 +102,13 @@ function App() {
         {currentHash === '#/styleguide' ? <StyleGuide /> : (
           <>
             <Hero />
-            <LazyRender minHeight="100vh">
+            <LazyRender id="projects" minHeight="100vh">
               <Projects />
             </LazyRender>
-            <LazyRender minHeight="100vh">
+            <LazyRender id="skills" minHeight="100vh">
               <SkillsAndExperience />
             </LazyRender>
-            <LazyRender minHeight="100vh">
+            <LazyRender id="contact" minHeight="100vh">
               <ContactTerminal />
             </LazyRender>
           </>

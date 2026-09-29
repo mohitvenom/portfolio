@@ -182,7 +182,7 @@ export const ContactTerminal = () => {
   };
 
   return (
-    <section id="contact" style={{ paddingTop: 'var(--spacing-24)', paddingBottom: 'var(--spacing-24)' }}>
+    <section style={{ paddingTop: 'var(--spacing-24)', paddingBottom: 'var(--spacing-24)' }}>
       <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: 'var(--spacing-8)' }}>
         // CONTACT & LINKS
       </h2>

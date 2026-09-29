@@ -19,7 +19,7 @@ export const SkillsAndExperience = () => {
   };
 
   return (
-    <div style={{ paddingTop: 'var(--spacing-24)', paddingBottom: 'var(--spacing-24)' }}>
+    <section style={{ paddingTop: 'var(--spacing-24)', paddingBottom: 'var(--spacing-24)' }}>
       {/* SKILLS SECTION */}
       <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: 'var(--spacing-8)' }}>
         // SKILLS & CAPABILITIES
@@ -190,6 +190,6 @@ export const SkillsAndExperience = () => {
           ))}
         </ul>
       </div>
-    </div>
+    </section>
   );
 };

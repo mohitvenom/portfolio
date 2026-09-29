@@ -51,7 +51,7 @@ export const Projects = () => {
   };
 
   return (
-    <section id="projects" style={{ 
+    <section style={{ 
       paddingTop: 'var(--spacing-24)', 
       paddingBottom: 'var(--spacing-24)',
       minHeight: '100vh'
