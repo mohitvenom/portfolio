@@ -4,44 +4,65 @@ import { content } from '../data/content';
 import { scrollTo } from '../utils/lenis';
 import { Download, ChevronDown } from 'lucide-react';
 
+// Ref to communicate scrambling state without React re-renders
+const scramblingRef = { current: true };
+
 // Decrypt Text Animation Component
 const DecryptText = ({ text }: { text: string }) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッンАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩअआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह';
-  
   const [displayText, setDisplayText] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return text;
     }
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
     return text.split('').map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
   });
   
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      scramblingRef.current = false;
+      return;
+    }
 
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッンАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩअआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
     let iteration = 0;
-    let interval: number;
+    let animationFrameId: number;
+    let lastTime = performance.now();
 
-    interval = window.setInterval(() => {
-      setDisplayText(text.split('').map((_, index) => {
-        if (index < iteration) {
-          return text[index];
-        }
-        return chars[Math.floor(Math.random() * chars.length)];
-      }).join(''));
+    const animate = (time: number) => {
+      const elapsed = time - lastTime;
+      
+      // Throttle updates to ~100ms
+      if (elapsed > 100) {
+        lastTime = time;
+        setDisplayText(text.split('').map((_, index) => {
+          if (index < iteration) {
+            return text[index];
+          }
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join(''));
 
-      if (iteration >= text.length) {
-        clearInterval(interval);
+        // Advance 3 characters per tick to finish in ~1.8s
+        iteration += 3;
       }
 
-      iteration += 1 / 3;
-    }, 30);
+      if (iteration < text.length) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        setDisplayText(text);
+        scramblingRef.current = false;
+      }
+    };
 
-    return () => clearInterval(interval);
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, [text]);
 
   return (
     <span style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Real text for layout reservation (avoids CLS) */}
+      <span style={{ visibility: 'hidden', whiteSpace: 'pre-wrap' }}>{text}</span>
+      
       {/* Real text for screen readers */}
       <span className="sr-only" style={{ 
         position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', 
@@ -49,8 +70,10 @@ const DecryptText = ({ text }: { text: string }) => {
       }}>
         {text}
       </span>
-      {/* Animated text for sighted users */}
-      <span aria-hidden="true" style={{ whiteSpace: 'pre-wrap' }}>{displayText || text}</span>
+      {/* Animated text for sighted users (absolute to avoid CLS) */}
+      <span aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, whiteSpace: 'pre-wrap' }}>
+        {displayText || text}
+      </span>
     </span>
   );
 };
@@ -86,7 +109,7 @@ const NeuralCanvas = () => {
 
     // Reduce nodes on mobile
     const isMobile = width < 768;
-    const numNodes = isMobile ? 30 : 70;
+    const numNodes = isMobile ? 30 : 40;
     
     interface Node {
       x: number;
@@ -160,11 +183,14 @@ const NeuralCanvas = () => {
 
       ctx.clearRect(0, 0, width, height);
       
-      const connectDistance = 150;
+      const connectDistance = 100;
       const mouseInfluence = 200;
 
+      // During text scramble, drastically reduce nodes to prevent main thread contention (Lighthouse TBT)
+      const activeNodeCount = scramblingRef.current ? 5 : nodes.length;
+
       // Update and draw nodes
-      for (let i = 0; i < nodes.length; i++) {
+      for (let i = 0; i < activeNodeCount; i++) {
         const node = nodes[i];
 
         const dxMouse = mouseX - node.x;
@@ -209,7 +235,7 @@ const NeuralCanvas = () => {
         ctx.fill();
 
         // Connect edges
-        for (let j = i + 1; j < nodes.length; j++) {
+        for (let j = i + 1; j < activeNodeCount; j++) {
           const other = nodes[j];
           const dx = other.x - node.x;
           const dy = other.y - node.y;

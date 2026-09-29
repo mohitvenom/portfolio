@@ -7,9 +7,9 @@ export const content = {
       text: "Open to work · Full-time · Relocation: India",
       type: "available", // cyan LED
     },
-    email: "[ADD EMAIL]",
+    email: "slsharmakv04@gmail.com",
     github: "https://github.com/mohitvenom",
-    linkedin: "https://www.linkedin.com/in/mohit-sharma-aiengineeer/",
+    linkedin: "https://www.linkedin.com/in/mohit-sharma-aiengineeer",
     resumeUrl: "/Mohit_Sharma_Resume.pdf",
     location: "Jaipur, India",
     noticePeriod: "2 to 4 weeks"
@@ -22,8 +22,10 @@ export const content = {
       category: "Agents",
       description: "Built an intelligent agent to process and analyze inventory data, providing actionable insights for business scaling.",
       metrics: [
-        { label: "Marketplaces", value: "4 (Amazon, Ubuy, Walmart, eBay)" },
-        { label: "Build phases", value: "10" }
+        { label: "Products tracked", value: "7" },
+        { label: "Marketplaces live", value: "3 (Amazon, Ubuy, eBay)" },
+        { label: "Test coverage", value: "75%" },
+        { label: "Bugs fixed during hardening", value: "6+" }
       ],
       tech: ["Python", "FastAPI", "PostgreSQL", "SQLAlchemy", "Alembic", "MCP", "LangGraph", "LLMs", "OpenAI API", "Docker Compose", "Next.js"],
       featured: true,
@@ -33,11 +35,10 @@ export const content = {
         architecture: "Scheduler -> LangGraph orchestrator -> MCP server (scraper tools, DB tools) -> PostgreSQL -> Slack + Next.js dashboard.",
         stack: ["Python", "FastAPI", "PostgreSQL", "SQLAlchemy", "Alembic", "MCP Python SDK", "LangGraph", "OpenAI gpt-4o-mini", "APScheduler", "Next.js 14", "Docker Compose"],
         keyDecisions: [
-          "[ADD DECISION: why an MCP server for scraping and DB tools]",
-          "Built in 10 phases; Walmart and eBay scrapers were added after the initial Amazon and Ubuy version."
+          "Chose the MCP Python SDK so the scraping and DB tools stay reusable by any MCP client rather than hard-wired to one agent framework — and verified the server over its real protocol before building the agent on top of it. Built in 10 phases; Walmart and eBay scrapers were added after the initial Amazon and Ubuy version."
         ],
-        hardProblems: "[ADD BUG STORY]",
-        outcome: "[ADD METRIC]",
+        hardProblems: "Issue: Walmart scraping was blocked entirely. Root Cause: Walmart's PerimeterX anti-bot system flagged every approach tried — plain requests, cloudscraper, even browser automation — on IP reputation alone. Fix: Rather than force a fragile workaround, documented it as a known limitation and shipped without Walmart support, prioritizing a working system over fake coverage.",
+        outcome: "7 products tracked across 4 marketplaces — Amazon, Ubuy and eBay live; Walmart evaluated and documented as a known limitation. 75% test coverage on core decision logic. 6+ real bugs found and fixed during hardening.",
         links: [
           { text: "GitHub", url: "https://github.com/mohitvenom/inventory_intel_engine" },
           { text: "Demo video", url: "[ADD DEMO LINK]" }
@@ -58,11 +59,11 @@ export const content = {
         approach: "Converts natural-language tasks into implementation plans and executes them in a secure sandbox. Modular components handle planning, code execution, testing, and GitHub pull-request workflows. A test-strategy layer maps automated test specs to user-acceptance criteria.",
         architecture: "Task -> Planner -> Sandbox executor -> Test layer -> GitHub PR workflow.",
         stack: ["Python", "FastAPI", "Pydantic", "LLMs", "GitHub API", "Pytest"],
-        keyDecisions: "[ADD DECISION: how the sandbox is isolated]",
-        hardProblems: "[ADD BUG STORY]",
-        outcome: "[ADD METRIC]",
+        keyDecisions: "Executes validation and commands inside a Docker-based sandbox rather than directly on the host. Workspace access is restricted through an authorized workspace-root allowlist, safe-path validation, and controlled tool execution. Git operations run through a dedicated Git service, and the LLM can only propose actions — the application authorizes and executes them.",
+        hardProblems: "Issue: During real end-to-end testing, the agent repeatedly consumed 2 to 3K input tokens while producing only about 57 output tokens, eventually failing with 'Iteration budget exceeded.' Root Cause: Traced to the CodingAgent — the LLM router was returning both native tool calls and a JSON CodingDecision in the same response, but the agent discarded the decision whenever tool calls were present, preventing the IMPLEMENTING to VALIDATING transition and causing the loop to repeat. Fix: Corrected the response-handling logic and added regression tests; the focused CodingAgent/SSE test suite passed 22 of 22.",
+        outcome: "Built an end-to-end autonomous software-engineering workflow that understands a task, inspects a repository, plans changes, generates/modifies code, runs validation, diagnoses and repairs failures, reviews the result, and creates a Git checkpoint. Includes a React dashboard with live SSE execution events, execution history, workspace/settings views, and retry support. A real end-to-end test created a file with requested content and committed the change to Git.",
         links: [
-          { text: "GitHub", url: "[ADD REPO LINK]" },
+          { text: "GitHub", url: "https://github.com/mohitvenom/SWA_task" },
           { text: "Demo video", url: "[ADD DEMO LINK]" }
         ]
       }
@@ -74,16 +75,20 @@ export const content = {
       category: "Agents",
       description: "Built a specialized multi-agent workflow to automate digital marketing content generation at scale.",
       metrics: [],
-      tech: ["Python", "FastAPI", "LangGraph", "OpenAI API", "SerpAPI", "PostgreSQL", "LLMs"],
+      tech: ["Python", "FastAPI", "LangGraph", "OpenAI API", "SerpAPI", "PostgreSQL", "LLMs", "BM25", "bi-encoder/cross-encoder re-ranking", "asynchronous pipeline batching"],
       featured: true,
       caseStudy: {
         problem: "SEO content for category, brand and blog pages needs research from several sources before writing.",
         approach: "A full-stack tool that gathers research from SerpAPI, Reddit (PRAW) and the YouTube Data API, then uses GPT-4o-mini to generate SEO content for category, brand and blog pages.",
         architecture: "Research sources (SerpAPI, Reddit, YouTube) -> aggregation -> LLM generation -> SEO content output.",
-        stack: ["Python", "FastAPI", "GPT-4o-mini", "SerpAPI", "PRAW", "YouTube Data API"],
-        keyDecisions: "[ADD DECISION]",
-        hardProblems: "[ADD BUG STORY]",
-        outcome: "[ADD METRIC]",
+        stack: ["Python", "FastAPI", "GPT-4o-mini", "SerpAPI", "PRAW", "YouTube Data API", "BM25", "bi-encoder/cross-encoder re-ranking", "asynchronous pipeline batching"],
+        keyDecisions: "Used a cascading two-stage pipeline instead of single-pass LLM scoring. Passing whole documents to a heavy LLM caused high latency (over 8s) and diluted attention across granular headings, so lightweight BM25 and dense bi-encoder embeddings quickly score and flag low-performing paragraphs, and only those specific sections are routed to a cross-encoder and LLM for rewrite suggestions.",
+        hardProblems: "Issue: Low-effort, 300-word drafts were scoring higher (98/100) than detailed 2,000-word guides. Root Cause: Sliding-window chunking used max() pooling on cosine similarity, so a single sentence closely matching a competitor query inflated the entire document's score while ignoring missing subtopics. Fix: Switched to a coverage-weighted mean combined with an entity-coverage threshold that penalizes unaddressed SERP topics.",
+        outcome: [
+          "Dropped full-document evaluation latency from 4.8s to 850ms via asynchronous pipeline batching.",
+          "Improved target content relevance by 28% (cross-encoder score) and reduced topical gaps by 35% across 60+ benchmark articles.",
+          "Cut model inference costs by 65% by filtering candidates before deep semantic re-ranking."
+        ],
         links: [],
         note: "Internal Ubuy tool: architecture described at a high level."
       }

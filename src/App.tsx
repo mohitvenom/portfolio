@@ -15,12 +15,14 @@ import './index.css';
 
 function App() {
   useEffect(() => {
+    const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: isReducedMotion ? 0 : 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
-      smoothWheel: true,
+      smoothWheel: !isReducedMotion,
       wheelMultiplier: 1,
       touchMultiplier: 2,
     });
