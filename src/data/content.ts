@@ -2,9 +2,10 @@ export const content = {
   personal: {
     name: "Mohit Sharma",
     role: "AI Engineer",
-    tagline: "Engineering Autonomous Systems & Neural Architectures",
+    tagline: "Building AI Systems That Execute, Automate & Adapt",
+    supportingDescription: "AI Engineer building autonomous agents, automation systems, and LLM-powered applications.",
     status: {
-      text: "Open to work · Full-time · Relocation: India",
+      text: "Open to work · Full-time · India",
       type: "available", // cyan LED
     },
     email: "slsharmakv04@gmail.com",
@@ -139,97 +140,82 @@ export const content = {
   ],
   skills: [
     {
-      category: "LLMs & Agents",
+      category: "AI & Agents",
       items: [
         { name: "LLMs" },
-        { name: "prompt engineering" },
-        { name: "NLP" },
         { name: "OpenAI API" },
         { name: "LangGraph" },
-        { name: "MCP" }
+        { name: "MCP" },
+        { name: "NLP" },
+        { name: "prompt engineering" }
       ]
     },
     {
-      category: "Backend",
+      category: "Backend & Data",
       items: [
         { name: "Python" },
         { name: "FastAPI" },
         { name: "Pydantic" },
         { name: "Flask" },
+        { name: "PostgreSQL" },
         { name: "SQLAlchemy" },
         { name: "Alembic" },
-        { name: "PostgreSQL" },
         { name: "MySQL" },
-        { name: "basic SQL" }
+        { name: "Pandas" }
       ]
     },
     {
-      category: "Automation & Scraping",
+      category: "Automation",
       items: [
-        { name: "Selenium" },
         { name: "Playwright" },
+        { name: "Selenium" },
         { name: "requests/BeautifulSoup" },
         { name: "cloudscraper" },
         { name: "Chrome extensions" }
       ]
     },
     {
-      category: "Data & ML",
-      items: [
-        { name: "Pandas" },
-        { name: "TensorFlow/Keras" },
-        { name: "OpenCV" }
-      ]
-    },
-    {
-      category: "DevOps basics",
+      category: "Engineering & Infrastructure",
       items: [
         { name: "Docker" },
         { name: "Docker Compose" },
         { name: "Pytest" },
         { name: "GitHub API" }
       ]
-    },
-    {
-      category: "Frontend (dashboards)",
-      items: [
-        { name: "Next.js" }
-      ]
     }
   ],
   experience: [
     {
-      id: "ai-engineer-ubuy",
-      role: "AI Engineer",
+      id: "ubuy",
       company: "Ubuy Technologies",
-      period: "Jan 2026 to present",
-      description: "AI Engineer, embedded in the digital marketing team.",
-      projects: []
+      roles: [
+        {
+          id: "ai-engineer",
+          title: "AI Engineer",
+          period: "Jan 2026 – Present",
+          description: "Embedded in the digital marketing team.",
+          projects: ["inventory-intel-agent", "content-gen-tool", "seo-automation", "product-research-dash", "keyword-explorer"]
+        },
+        {
+          id: "ai-intern",
+          title: "AI Intern",
+          period: "Sept 2025 – Dec 2025",
+          description: "Embedded in the digital marketing team."
+        }
+      ]
     },
     {
-      id: "ai-intern-ubuy",
-      role: "AI Intern",
-      company: "Ubuy Technologies",
-      period: "Sept to Dec 2025",
-      description: "AI Intern, embedded in the digital marketing team.",
-      projects: []
-    },
-    {
-      id: "ubuy-shared-projects",
-      role: "Built at Ubuy",
-      company: "Internal Tools",
-      period: "Sept 2025 to present",
-      description: "",
-      projects: ["content-gen-tool", "seo-automation-tools", "product-research-dash", "keyword-explorer"]
-    },
-    {
-      id: "education-uem",
-      role: "B.Tech in Computer Science",
-      company: "University of Engineering and Management, Jaipur",
-      period: "2022 to 2026",
-      description: "CGPA 8.69/10",
-      certifications: ["Python for Data Science (NPTEL)", "Database Management Systems (NPTEL)", "Deep Learning (Infosys)"],
-      projects: []
+      id: "education",
+      company: "EDUCATION",
+      roles: [
+        {
+          id: "btech",
+          title: "B.Tech in Computer Science",
+          period: "2022 – 2026",
+          description: "University of Engineering and Management, Jaipur\nCGPA 8.69/10",
+          certifications: ["Python for Data Science (NPTEL)", "Database Management Systems (NPTEL)", "Deep Learning (Infosys)"]
+        }
+      ]
     }
   ],
   achievements: [

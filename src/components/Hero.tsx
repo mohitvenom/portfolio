@@ -351,7 +351,7 @@ export const Hero = () => {
             alignItems: 'center', 
             gap: 'var(--spacing-3)',
             padding: 'var(--spacing-2) var(--spacing-4)',
-            marginBottom: 'var(--spacing-8)',
+            marginBottom: 'var(--spacing-6)',
             border: '1px solid var(--status-cyan)',
             background: 'rgba(0, 229, 255, 0.05)',
             boxShadow: '0 0 10px rgba(0, 229, 255, 0.1)'
@@ -362,23 +362,12 @@ export const Hero = () => {
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 style={{ 
-            fontSize: 'clamp(2rem, 5vw, 4rem)', 
-            lineHeight: 1.1, 
-            marginBottom: 'var(--spacing-6)',
-            maxWidth: '900px',
-            color: 'var(--text-primary)'
-          }}>
-            <DecryptText text={content.personal.tagline} />
-          </h1>
-
-          {/* Subtitle with blinking cursor */}
+          {/* Name / Role */}
           <div style={{ 
             fontFamily: 'var(--font-mono)', 
             fontSize: 'clamp(1rem, 2vw, 1.25rem)', 
             color: 'var(--accent-amber)',
-            marginBottom: 'var(--spacing-12)',
+            marginBottom: 'var(--spacing-4)',
             display: 'flex',
             alignItems: 'center'
           }}>
@@ -397,12 +386,35 @@ export const Hero = () => {
             />
           </div>
 
+          {/* Headline */}
+          <h1 style={{ 
+            fontSize: 'clamp(2rem, 5vw, 4rem)', 
+            lineHeight: 1.1, 
+            marginBottom: 'var(--spacing-4)',
+            maxWidth: '900px',
+            color: 'var(--text-primary)'
+          }}>
+            <DecryptText text={content.personal.tagline} />
+          </h1>
+
+          {/* Supporting Description */}
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 'clamp(1rem, 1.5vw, 1.125rem)',
+            color: 'var(--text-secondary)',
+            marginBottom: 'var(--spacing-10)',
+            maxWidth: '700px',
+            lineHeight: 1.6
+          }}>
+            {content.personal.supportingDescription}
+          </p>
+
           {/* Skill Badges */}
           <div style={{ 
             display: 'flex', 
             flexWrap: 'wrap', 
             gap: 'var(--spacing-3)', 
-            marginBottom: 'var(--spacing-12)',
+            marginBottom: 'var(--spacing-10)',
             maxWidth: '800px'
           }}>
             {skills.map((skill, i) => (

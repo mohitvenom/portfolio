@@ -52,8 +52,8 @@ export const Projects = () => {
 
   return (
     <section style={{ 
-      paddingTop: 'var(--spacing-24)', 
-      paddingBottom: 'var(--spacing-24)',
+      paddingTop: 'var(--spacing-16)', 
+      paddingBottom: 'var(--spacing-16)',
       minHeight: '100vh'
     }}>
       <div style={{ marginBottom: 'var(--spacing-12)' }}>
@@ -119,7 +119,7 @@ export const Projects = () => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-4)' }}>
                   <div>
-                    <span style={{ color: 'var(--status-cyan)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: 'var(--spacing-2)' }}>
+                    <span style={{ color: 'var(--status-cyan)', fontSize: '0.875rem', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: 'var(--spacing-2)' }}>
                       SYS.{project.category.toUpperCase()}
                     </span>
                     <h3 style={{ fontSize: '1.5rem', marginBottom: 'var(--spacing-2)' }}>{project.title}</h3>
@@ -127,43 +127,100 @@ export const Projects = () => {
                   <ArrowUpRight style={{ color: 'var(--text-muted)' }} size={24} />
                 </div>
                 
-                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-6)', flexGrow: 1 }}>
+                <p style={{ color: 'var(--text-primary)', marginBottom: 'var(--spacing-6)', fontWeight: 500, lineHeight: 1.4 }}>
                   {project.description}
                 </p>
 
-                {project.metrics && project.metrics.length > 0 && (
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr', 
-                    gap: 'var(--spacing-4)',
-                    padding: 'var(--spacing-4)',
-                    background: 'var(--bg-slate-900)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    marginBottom: 'var(--spacing-6)'
-                  }}>
-                    {project.metrics.map((m, i) => (
-                      <div key={i}>
-                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: 'var(--spacing-1)' }}>{m.label}</span>
-                        <span style={{ fontSize: '1.125rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-amber)' }}>{m.value}</span>
+                {project.caseStudy && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)', marginBottom: 'var(--spacing-6)', flexGrow: 1 }}>
+                    
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.875rem', color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginBottom: 'var(--spacing-2)' }}>// PROBLEM</span>
+                      <p style={{ 
+                        color: 'var(--text-secondary)', 
+                        fontSize: '1rem', 
+                        lineHeight: 1.6,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {project.caseStudy.problem}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.875rem', color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginBottom: 'var(--spacing-2)' }}>// SYSTEM</span>
+                      <p style={{ 
+                        color: 'var(--text-secondary)', 
+                        fontSize: '1rem', 
+                        lineHeight: 1.6,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {project.caseStudy.architecture}
+                      </p>
+                    </div>
+
+                    {project.caseStudy.outcome && (
+                      <div>
+                        <span style={{ display: 'block', fontSize: '0.875rem', color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginBottom: 'var(--spacing-2)' }}>// IMPACT</span>
+                        <div style={{ 
+                          color: 'var(--text-secondary)', 
+                          fontSize: '1rem', 
+                          lineHeight: 1.6,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {Array.isArray(project.caseStudy.outcome) ? (
+                            <ul style={{ margin: 0, paddingLeft: '1rem' }}>
+                              <li>{project.caseStudy.outcome[0]}</li>
+                            </ul>
+                          ) : (
+                            <p>{project.caseStudy.outcome}</p>
+                          )}
+                        </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
-                  {project.tech.map(t => (
-                    <span key={t} style={{ 
-                      fontSize: '0.75rem', 
-                      fontFamily: 'var(--font-mono)', 
-                      padding: '4px 8px', 
-                      background: 'var(--bg-slate-700)', 
-                      borderRadius: '4px',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {t}
-                    </span>
-                  ))}
+                <div style={{ marginBottom: 'var(--spacing-6)' }}>
+                  <span style={{ display: 'block', fontSize: '0.875rem', color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginBottom: 'var(--spacing-3)' }}>// TECH</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
+                    {project.tech.slice(0, 5).map(t => (
+                      <span key={t} style={{ 
+                        fontSize: '0.875rem', 
+                        fontFamily: 'var(--font-mono)', 
+                        padding: '4px 8px', 
+                        background: 'var(--bg-slate-700)', 
+                        borderRadius: '4px',
+                        color: 'var(--text-secondary)'
+                      }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ 
+                  marginTop: 'auto', 
+                  paddingTop: 'var(--spacing-4)', 
+                  borderTop: '1px solid var(--border-color)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  color: 'var(--status-cyan)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold'
+                }}>
+                  <span>VIEW CASE STUDY</span>
+                  <span style={{ opacity: 0.8 }}>→</span>
                 </div>
               </m.button>
             ))}
@@ -173,7 +230,7 @@ export const Projects = () => {
         {/* Secondary Grid */}
         {secondaryProjects.length > 0 && (
           <>
-            <h3 style={{ fontSize: '1.5rem', marginTop: 'var(--spacing-8)', color: 'var(--text-muted)' }}>// UTILITIES & AUTOMATIONS</h3>
+            <h3 style={{ fontSize: '1.25rem', marginTop: 'var(--spacing-8)', color: 'var(--text-muted)' }}>// ADDITIONAL SYSTEMS & AUTOMATION</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--spacing-4)' }}>
               <AnimatePresence>
                 {secondaryProjects.map(project => (
@@ -184,16 +241,39 @@ export const Projects = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                     className="panel"
-                    style={{ padding: 'var(--spacing-4)' }}
+                    style={{ 
+                      padding: 'var(--spacing-5)', 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      background: 'var(--bg-slate-900)',
+                      border: '1px solid var(--border-color)',
+                      height: '100%'
+                    }}
                   >
-                    <h4 style={{ fontSize: '1.125rem', marginBottom: 'var(--spacing-2)' }}>{project.title}</h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 'var(--spacing-4)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-3)' }}>
+                      <h4 style={{ fontSize: '1.125rem', margin: 0, color: 'var(--text-primary)' }}>
+                        {project.title.replace(' [In Progress]', '').replace(' [Academic Project]', '')}
+                      </h4>
+                      {project.title.includes('[In Progress]') && (
+                        <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(0, 229, 255, 0.1)', color: 'var(--status-cyan)', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                          IN PROGRESS
+                        </span>
+                      )}
+                      {project.title.includes('[Academic Project]') && (
+                        <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255, 176, 0, 0.1)', color: 'var(--accent-amber)', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                          ACADEMIC
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: 'var(--spacing-4)', lineHeight: 1.6, flexGrow: 1 }}>
                       {project.description}
                     </p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
+                    
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginTop: 'auto' }}>
                       {project.tech.map(t => (
                         <span key={t} style={{ 
-                          fontSize: '0.65rem', 
+                          fontSize: '0.875rem', 
                           fontFamily: 'var(--font-mono)', 
                           color: 'var(--text-muted)'
                         }}>

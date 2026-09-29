@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const siteUrl = process.env.SITE_URL || 'https://mohitsharma.ai'; // fallback
-const normalizedSiteUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+const siteUrl = process.env.SITE_URL || 'https://mohitvenom.github.io/portfolio'; // fallback
+const normalizedSiteUrl = siteUrl.replace(/\/+$/, ''); // Strip all trailing slashes safely
 const publicDir = path.resolve(process.cwd(), 'public');
 
 // Generate robots.txt
@@ -26,9 +26,12 @@ const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapXml);
 console.log('✅ Generated sitemap.xml');
 
-// Update index.html with SITE_URL
+// Update index.html with SITE_URL if it was provided differently from the default
 const indexPath = path.resolve(process.cwd(), 'index.html');
 let indexHtml = fs.readFileSync(indexPath, 'utf-8');
-indexHtml = indexHtml.replace(/https:\/\/mohitsharma\.ai/g, normalizedSiteUrl);
-fs.writeFileSync(indexPath, indexHtml);
-console.log('✅ Updated index.html with SITE_URL');
+// Only replace if normalizedSiteUrl is different from the default to avoid unnecessary writes
+if (normalizedSiteUrl !== 'https://mohitvenom.github.io/portfolio') {
+  indexHtml = indexHtml.replace(/https:\/\/mohitvenom\.github\.io\/portfolio/g, normalizedSiteUrl);
+  fs.writeFileSync(indexPath, indexHtml);
+}
+console.log(`✅ SEO configured for ${normalizedSiteUrl}`);
