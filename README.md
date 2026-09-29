@@ -22,10 +22,12 @@ Because this SPA uses strict hash-based routing (`#/case/id`), **it does not req
 - Output Directory: `dist`
 - Note: No configuration required.
 
-**GitHub Pages**:
-- Build Command: `npm run build`
-- Output Directory: `dist`
-- Note: You must update `vite.config.ts` to set the `base` property to `'/portfolio/'` (or your repo name) if you are not deploying to a custom domain root.
+**GitHub Pages (Automated via Actions)**:
+This repository is configured to deploy automatically via GitHub Actions whenever changes are pushed to `main`.
+1. Go to your repository **Settings > Pages**.
+2. Under **Build and deployment**, set the **Source** to **GitHub Actions**.
+3. Push to `main`. The included `.github/workflows/deploy.yml` will automatically build the project, run preflight checks (including placeholder audits), and deploy the `dist/` folder using native Pages actions.
+- Note: `vite.config.ts` is configured with `base: '/portfolio/'` to serve correctly from a project page.
 
 ### Environment Variables
 - `SITE_URL`: Set this in your deployment environment (e.g., `https://mohitsharma.ai`) to correctly generate the `sitemap.xml`, `robots.txt`, and canonical tags during the build step.
