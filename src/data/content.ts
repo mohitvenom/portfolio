@@ -10,7 +10,7 @@ export const content = {
     email: "slsharmakv04@gmail.com",
     github: "https://github.com/mohitvenom",
     linkedin: "https://www.linkedin.com/in/mohit-sharma-aiengineeer",
-    resumeUrl: "/Mohit_Sharma_Resume.pdf",
+    resumeUrl: import.meta.env.BASE_URL + "Mohit_Sharma_Resume.pdf",
     location: "Jaipur, India",
     noticePeriod: "2 to 4 weeks"
   },
