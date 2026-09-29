@@ -152,10 +152,6 @@ export const SkillsAndExperience = () => {
                       <p style={{ marginBottom: 'var(--spacing-2)' }}>{exp.description}</p>
                     )}
                     
-                    {exp.sharedText && (
-                      <p style={{ marginBottom: 'var(--spacing-2)' }}>{exp.sharedText}</p>
-                    )}
-                    
                     {exp.certifications && (
                       <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: 'var(--spacing-2)' }}>
                         Certifications: {exp.certifications.join(' · ')}
