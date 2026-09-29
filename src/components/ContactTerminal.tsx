@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { m } from 'motion/react';
+import { useState, useRef, useEffect } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Download, ExternalLink, Mail, ArrowUpRight } from 'lucide-react';
 import { content } from '../data/content';
 
@@ -82,6 +82,10 @@ export const ContactTerminal = () => {
           }
         }
         break;
+      case 'testlink':
+        printLine('Testing malicious link...', false, true);
+        printLine(`<a href="javascript:alert('xss')" target="_blank" rel="noopener noreferrer" style="color:var(--status-cyan);text-decoration:underline">Click me</a>`, false, true);
+        break;
       case 'status':
         printLine(content.personal.status.text);
         break;
@@ -149,17 +153,18 @@ export const ContactTerminal = () => {
         const hrefMatch = line.text.match(/href="([^"]+)"/);
         const contentMatch = line.text.match(/>([^<]+)<\/a>/);
         if (hrefMatch && contentMatch) {
-          // If we want typing animation on link text, we must type the content match
+          const rawUrl = hrefMatch[1];
+          const isSafe = /^(https?|mailto):/i.test(rawUrl);
           const linkText = contentMatch[1];
           const isFinished = textToRender === line.text;
           
-          if (!isFinished) {
+          if (!isSafe || !isFinished) {
             return <div style={{ color: 'var(--status-cyan)' }}>{textToRender}</div>;
           }
           
           return (
             <div style={{ color: 'var(--status-cyan)' }}>
-              <a href={hrefMatch[1]} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--status-cyan)', textDecoration: 'underline' }}>
+              <a href={rawUrl} target="_blank" rel="noopener noreferrer" tabIndex={-1} style={{ color: 'var(--status-cyan)', textDecoration: 'underline' }}>
                 {linkText}
               </a>
             </div>
@@ -207,19 +212,27 @@ export const ContactTerminal = () => {
             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }} />
           </div>
           
-          {/* Output Region */}
+          {/* Visually hidden Screen Reader Region */}
+          <div className="sr-only" role="log" aria-live="polite">
+            {output.map((line, i) => {
+               const text = line.isHtml ? line.text.replace(/<[^>]*>?/gm, '') : line.text;
+               return <div key={i}>{text}</div>;
+            })}
+          </div>
+
+          {/* Visual Output Region */}
           <div 
             ref={terminalRef}
-            role="log"
-            aria-live="polite"
+            aria-hidden="true"
             style={{ padding: 'var(--spacing-4)', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}
           >
             {output.map((line, i) => (
               <TypewriterLine key={i} line={line} />
             ))}
+          </div>
             
-            {/* Input Line */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
+          {/* Input Line (Accessible) */}
+          <div style={{ padding: '0 var(--spacing-4) var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: 'auto' }}>
               <span style={{ color: 'var(--accent-amber)' }}>mohit@portfolio:~$</span>
               <label htmlFor="terminal-input" className="sr-only">Terminal Input</label>
               <input 
@@ -243,7 +256,6 @@ export const ContactTerminal = () => {
                 spellCheck="false"
               />
             </div>
-          </div>
         </div>
 
         {/* Visible Quick Links */}

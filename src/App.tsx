@@ -69,8 +69,9 @@ function App() {
 
   return (
     <LazyMotion features={domAnimation} strict>
+      <a href="#main-content" className="skip-link sr-only focusable">Skip to content</a>
       <Nav />
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--spacing-6)' }}>
+      <main id="main-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--spacing-6)' }}>
         {currentHash === '#/styleguide' ? <StyleGuide /> : (
           <>
             <Hero />

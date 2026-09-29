@@ -9,7 +9,7 @@ export const content = {
     },
     email: "[ADD EMAIL]",
     github: "https://github.com/mohitvenom",
-    linkedin: "https://linkedin.com/in/mohit-sharma-aiengineeer",
+    linkedin: "https://www.linkedin.com/in/mohit-sharma-aiengineeer/",
     resumeUrl: "/Mohit_Sharma_Resume.pdf",
     location: "Jaipur, India",
     noticePeriod: "2 to 4 weeks"
@@ -22,10 +22,10 @@ export const content = {
       category: "Agents",
       description: "Built an intelligent agent to process and analyze inventory data, providing actionable insights for business scaling.",
       metrics: [
-        { label: "Throughput", value: "[ADD METRIC]" },
-        { label: "Accuracy", value: "[ADD METRIC]" }
+        { label: "Marketplaces", value: "4 (Amazon, Ubuy, Walmart, eBay)" },
+        { label: "Build phases", value: "10" }
       ],
-      tech: ["Python", "LangGraph", "LLMs"],
+      tech: ["Python", "FastAPI", "PostgreSQL", "SQLAlchemy", "Alembic", "MCP", "LangGraph", "LLMs", "OpenAI API", "Docker Compose", "Next.js"],
       featured: true,
       caseStudy: {
         problem: "Price and stock changes across marketplaces (Amazon, Ubuy, Walmart, eBay) are easy to miss when checked manually.",
@@ -50,11 +50,8 @@ export const content = {
       type: "Flagship",
       category: "ML",
       description: "Built a comprehensive AI development platform bridging prompt engineering with scalable deployment architectures.",
-      metrics: [
-        { label: "Latency", value: "[ADD METRIC]" },
-        { label: "Uptime", value: "[ADD METRIC]" }
-      ],
-      tech: ["Python", "FastAPI", "React", "MCP"],
+      metrics: [],
+      tech: ["Python", "FastAPI", "Pydantic", "LLMs", "GitHub API", "Pytest"],
       featured: true,
       caseStudy: {
         problem: "Turning a natural-language task into a tested pull request involves planning, coding, testing and review as separate manual steps.",
@@ -76,11 +73,8 @@ export const content = {
       type: "Flagship",
       category: "Agents",
       description: "Built a specialized multi-agent workflow to automate digital marketing content generation at scale.",
-      metrics: [
-        { label: "Content Vol.", value: "[ADD METRIC]" },
-        { label: "Engagement", value: "[ADD METRIC]" }
-      ],
-      tech: ["LangGraph", "OpenAI", "PostgreSQL"],
+      metrics: [],
+      tech: ["Python", "FastAPI", "LangGraph", "OpenAI API", "SerpAPI", "PostgreSQL", "LLMs"],
       featured: true,
       caseStudy: {
         problem: "SEO content for category, brand and blog pages needs research from several sources before writing.",
@@ -100,7 +94,7 @@ export const content = {
       type: "Secondary",
       category: "Automation",
       description: "Built automation for Google and Bing webmaster workflows, plus a Google indexing tool, replacing manual work that took roughly 5 to 6 hours per weekly cycle.",
-      tech: ["Python", "Automation", "Chrome extensions"],
+      tech: ["Python", "Automation"],
       featured: false
     },
     {
@@ -118,7 +112,7 @@ export const content = {
       type: "Secondary",
       category: "Automation",
       description: "Built a single-page research dashboard combining SerpAPI, Rainforest API, Google Search Console and GA4, plus product and deals scrapers and a stock-status checker for storefront URLs.",
-      tech: ["Python", "SerpAPI", "OpenAI API", "requests/BeautifulSoup", "cloudscraper", "Chrome extensions"],
+      tech: ["Python", "SerpAPI", "OpenAI API", "requests/BeautifulSoup", "cloudscraper"],
       featured: false
     },
     {
@@ -208,7 +202,7 @@ export const content = {
       period: "Jan 2026 to present",
       description: "Embedded in the digital marketing team. [ADD: what I built as an AI Engineer]",
       sharedText: "Built internal tools including a content generation tool, SEO automation tool, keyword research tool, Google indexing tool, and Chrome extensions for task automation and scraping.",
-      projects: ["content-gen-tool", "seo-automation-tools", "keyword-explorer", "product-research-dash"]
+      projects: []
     },
     {
       id: "ai-intern-ubuy",
@@ -216,7 +210,15 @@ export const content = {
       company: "Ubuy Technologies",
       period: "Sept to Dec 2025",
       description: "[ADD: what I built as an intern]",
-      projects: ["content-gen-tool", "seo-automation-tools", "keyword-explorer", "product-research-dash"]
+      projects: []
+    },
+    {
+      id: "ubuy-shared-projects",
+      role: "Built at Ubuy",
+      company: "Internal Tools",
+      period: "Sept 2025 to present",
+      description: "",
+      projects: ["content-gen-tool", "seo-automation-tools", "product-research-dash", "keyword-explorer"]
     },
     {
       id: "education-uem",

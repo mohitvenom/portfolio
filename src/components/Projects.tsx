@@ -3,13 +3,13 @@ import { content } from '../data/content';
 import { m, AnimatePresence } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 
+const categories = ['All', 'Agents', 'Automation', 'ML'];
+
 export const Projects = () => {
   const [filter, setFilter] = useState('All');
-  const [ledStyle, setLedStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const [ledStyle, setLedStyle] = useState({ left: 0, top: 0, width: 0, height: 0, opacity: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  
-  const categories = ['All', 'Agents', 'Automation', 'ML'];
   
   useEffect(() => {
     const updateLed = () => {
@@ -35,7 +35,7 @@ export const Projects = () => {
     document.fonts.ready.then(updateLed);
 
     return () => observer.disconnect();
-  }, [filter, categories]);
+  }, [filter]);
   
   const filteredProjects = content.projects.filter(p => 
     filter === 'All' ? true : p.category === filter
@@ -79,7 +79,7 @@ export const Projects = () => {
           {categories.map((cat, i) => (
             <button
               key={cat}
-              ref={el => buttonRefs.current[i] = el}
+              ref={(el) => { buttonRefs.current[i] = el; }}
               className={`hardware-btn ${filter === cat ? 'primary' : ''}`}
               onClick={() => setFilter(cat)}
               style={{ position: 'relative' }}
@@ -131,7 +131,7 @@ export const Projects = () => {
                   {project.description}
                 </p>
 
-                {project.metrics && (
+                {project.metrics && project.metrics.length > 0 && (
                   <div style={{ 
                     display: 'grid', 
                     gridTemplateColumns: '1fr 1fr', 

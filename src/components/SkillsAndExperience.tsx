@@ -1,15 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { content } from '../data/content';
 import { m, AnimatePresence } from 'motion/react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export const SkillsAndExperience = () => {
-  const [prefersReduced, setPrefersReduced] = useState(false);
+  const [prefersReduced] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false);
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, []);
 
   const toggleNode = (id: string) => {
     setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
@@ -69,7 +65,11 @@ export const SkillsAndExperience = () => {
                     }}
                   >
                     <span style={{ fontWeight: '500' }}>{skill.name}</span>
-                    {usedInIds.length > 0 && (
+                    {skill.name === 'Chrome extensions' ? (
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                        Small internal tools built at Ubuy
+                      </span>
+                    ) : usedInIds.length > 0 && (
                       <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
                         Used in: {usedInIds.map((id, i) => {
                           const url = getProjectUrl(id);
@@ -141,13 +141,16 @@ export const SkillsAndExperience = () => {
             <AnimatePresence>
               {expandedNodes[exp.id] && (
                 <m.div
-                  initial={prefersReduced ? false : { height: 0, opacity: 0 }}
-                  animate={prefersReduced ? false : { height: 'auto', opacity: 1 }}
-                  exit={prefersReduced ? false : { height: 0, opacity: 0 }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={prefersReduced ? { duration: 0 } : {}}
                   style={{ overflow: 'hidden' }}
                 >
                   <div style={{ padding: 'var(--spacing-4) var(--spacing-4) 0', color: 'var(--text-secondary)' }}>
-                    <p style={{ marginBottom: 'var(--spacing-2)' }}>{exp.description}</p>
+                    {exp.description && (
+                      <p style={{ marginBottom: 'var(--spacing-2)' }}>{exp.description}</p>
+                    )}
                     
                     {exp.sharedText && (
                       <p style={{ marginBottom: 'var(--spacing-2)' }}>{exp.sharedText}</p>

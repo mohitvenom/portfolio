@@ -7,13 +7,11 @@ interface CaseStudyDiagramProps {
 }
 
 export const CaseStudyDiagram = ({ id }: CaseStudyDiagramProps) => {
-  const [prefersReduced, setPrefersReduced] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [prefersReduced] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(max-width: 480px)').matches : false);
 
   useEffect(() => {
-    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     const mql = window.matchMedia('(max-width: 480px)');
-    setIsMobile(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);

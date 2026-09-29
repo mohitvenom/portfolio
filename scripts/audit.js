@@ -15,7 +15,7 @@ function scanDir(dir) {
       const content = fs.readFileSync(fullPath, 'utf-8');
       const lines = content.split('\n');
       lines.forEach((line, index) => {
-        if (line.includes('[ADD ')) {
+        if (line.includes('[ADD')) {
           console.warn(`\n⚠️  Placeholder found in ${fullPath}:${index + 1}`);
           console.warn(`   -> ${line.trim()}`);
           hasPlaceholders = true;

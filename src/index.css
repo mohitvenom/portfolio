@@ -232,3 +232,31 @@ html.lenis, html.lenis body {
   }
 }
 
+
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.skip-link.focusable:focus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  clip: auto;
+  white-space: normal;
+  display: block;
+  padding: var(--spacing-4);
+  background: var(--bg-slate-900);
+  color: var(--status-cyan);
+  z-index: 9999;
+  outline: 2px solid var(--status-cyan);
+}
