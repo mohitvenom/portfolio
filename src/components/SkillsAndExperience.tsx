@@ -49,20 +49,27 @@ export const SkillsAndExperience = () => {
             </h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-3)' }}>
               {group.items.map(skill => (
-                <span 
+                <div 
                   key={skill.name} 
                   style={{
                     padding: 'var(--spacing-2) var(--spacing-4)',
                     background: 'var(--bg-slate-800)',
                     border: '1px solid var(--border-color)',
                     borderRadius: 'var(--radius-sm)',
-                    fontSize: '1rem',
-                    color: 'var(--text-primary)',
-                    fontWeight: 500
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: 'var(--spacing-2)'
                   }}
                 >
-                  {skill.name}
-                </span>
+                  <span style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                    {skill.name}
+                  </span>
+                  {(skill as any).usedIn && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      used in: {(skill as any).usedIn}
+                    </span>
+                  )}
+                </div>
               ))}
             </div>
           </m.div>

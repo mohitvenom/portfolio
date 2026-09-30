@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { m } from 'motion/react';
 import { content } from '../data/content';
 import { scrollTo } from '../utils/lenis';
-import { Download, ChevronDown } from 'lucide-react';
+import { Download, ArrowDown } from 'lucide-react';
 
 // Ref to communicate scrambling state without React re-renders
 const scramblingRef = { current: true };
@@ -331,10 +331,10 @@ export const Hero = () => {
   return (
     <section id="hero" style={{ 
       position: 'relative', 
-      minHeight: '100vh', 
+      minHeight: '80vh', 
       display: 'flex', 
       alignItems: 'center', 
-      paddingTop: 'var(--spacing-12)',
+      paddingTop: 'var(--spacing-16)',
       paddingBottom: 'var(--spacing-16)'
     }}>
       <NeuralCanvas />
@@ -442,7 +442,7 @@ export const Hero = () => {
               scrollTo('#projects', { offset: -73 });
             }}>
               VIEW PROJECTS
-              <ChevronDown size={18} />
+              <ArrowDown size={18} />
             </a>
           </div>
         </m.div>

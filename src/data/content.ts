@@ -182,6 +182,12 @@ export const content = {
         { name: "Pytest" },
         { name: "GitHub API" }
       ]
+    },
+    {
+      category: "Frontend (dashboards)",
+      items: [
+        { name: "Next.js", usedIn: "Inventory Intel Agent" }
+      ]
     }
   ],
   experience: [
@@ -194,7 +200,7 @@ export const content = {
           title: "AI Engineer",
           period: "Jan 2026 – Present",
           description: "Embedded in the digital marketing team.",
-          projects: ["inventory-intel-agent", "content-gen-tool", "seo-automation", "product-research-dash", "keyword-explorer"]
+          projects: ["content-gen-tool", "seo-automation", "product-research-dash", "keyword-explorer"]
         },
         {
           id: "ai-intern",
