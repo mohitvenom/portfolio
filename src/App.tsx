@@ -9,6 +9,12 @@ import { Projects } from './components/Projects';
 import { SkillsAndExperience } from './components/SkillsAndExperience';
 import { ContactTerminal } from './components/ContactTerminal';
 import { StyleGuide } from './components/StyleGuide';
+import { SpatialBackground } from './components/SpatialBackground';
+import { GeminiChatbot } from './components/GeminiChatbot';
+import { ScrollProgressBar } from './components/ScrollProgressBar';
+import { BackToTop } from './components/BackToTop';
+import { AgentPlayground } from './components/AgentPlayground';
+import { ResumeViewer } from './components/ResumeViewer';
 
 const CaseStudyOverlay = lazy(() => import('./components/CaseStudyOverlay'));
 import './index.css';
@@ -69,64 +75,216 @@ function App() {
     };
   }, []);
 
-  const [currentHash, setCurrentHash] = useState(window.location.hash);
+  const [currentHash, setCurrentHash] = useState(() => typeof window !== 'undefined' ? window.location.hash : '');
+  const [activeCaseId, setActiveCaseId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#/case/')) {
+      return window.location.hash.replace('#/case/', '');
+    }
+    return null;
+  });
+  const [isResumeOpen, setIsResumeOpen] = useState<boolean>(() => {
+    return typeof window !== 'undefined' && window.location.hash === '#/resume';
+  });
 
   useEffect(() => {
     const onHashChange = () => {
       const hash = window.location.hash;
-      if (hash.startsWith('#/')) {
-        setCurrentHash(hash);
+      setCurrentHash(hash);
+      if (hash.startsWith('#/case/')) {
+        setActiveCaseId(hash.replace('#/case/', ''));
       } else {
-        // If it's a section anchor, don't trigger overlay routes
-        setCurrentHash('');
+        setActiveCaseId(null);
+      }
+      if (hash === '#/resume') {
+        setIsResumeOpen(true);
       }
     };
     window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onHashChange);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('popstate', onHashChange);
+    };
   }, []);
 
+  const handleOpenCase = (id: string) => {
+    setActiveCaseId(id);
+    setCurrentHash(`#/case/${id}`);
+    try {
+      window.location.hash = `#/case/${id}`;
+    } catch {
+      // ignore
+    }
+  };
+
   const handleCloseOverlay = () => {
-    if (window.history.state?.openedFromCard) {
-      window.history.back();
-    } else {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    setActiveCaseId(null);
+    setCurrentHash('');
+    try {
+      if (window.location.hash.startsWith('#/case/')) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch {
+      window.location.hash = '';
+    }
+  };
+
+  const handleOpenResume = () => {
+    setIsResumeOpen(true);
+    try {
+      window.location.hash = '#/resume';
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleCloseResume = () => {
+    setIsResumeOpen(false);
+    try {
+      if (window.location.hash === '#/resume') {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch {
+      window.location.hash = '';
     }
   };
 
   return (
     <LazyMotion features={domAnimation} strict>
+      {/* Subtle fixed animated progress bar tracking scroll depth */}
+      <ScrollProgressBar />
+      <SpatialBackground />
       <a href="#main-content" className="skip-link sr-only focusable">Skip to content</a>
-      <Nav />
-      <main id="main-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--spacing-6)' }}>
+      <Nav onOpenResume={handleOpenResume} />
+      <main id="main-content" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem', width: '100%' }}>
         {currentHash === '#/styleguide' ? <StyleGuide /> : (
           <>
             <Hero />
-            <LazyRender id="projects" minHeight="100vh">
-              <Projects />
+            <LazyRender id="projects" minHeight="600px">
+              <Projects onSelectProject={handleOpenCase} />
             </LazyRender>
-            <LazyRender id="skills" minHeight="100vh">
+            <LazyRender id="sandbox" minHeight="650px">
+              <AgentPlayground />
+            </LazyRender>
+            <LazyRender id="skills" minHeight="600px">
               <SkillsAndExperience />
             </LazyRender>
-            <LazyRender id="contact" minHeight="100vh">
+            <LazyRender id="contact" minHeight="500px">
               <ContactTerminal />
             </LazyRender>
           </>
         )}
       </main>
 
-      {currentHash.startsWith('#/case/') && (
+      {/* Quiet Editorial Footer */}
+      <footer style={{
+        marginTop: 'auto',
+        borderTop: '1px solid var(--border-subtle)',
+        background: 'var(--bg-canvas)',
+        padding: '2.5rem 1.5rem',
+        width: '100%'
+      }}>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          fontSize: '0.8125rem',
+          color: 'var(--text-muted)'
+        }}>
+          <div>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Mohit Sharma</span>
+            <span style={{ margin: '0 0.5rem' }}>·</span>
+            <span>AI Engineer at Ubuy Technologies</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <a href="https://github.com/mohitvenom" target="_blank" rel="noreferrer" style={{ color: 'var(--text-secondary)' }}>
+              GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/mohit-sharma-aiengineeer" target="_blank" rel="noreferrer" style={{ color: 'var(--text-secondary)' }}>
+              LinkedIn
+            </a>
+            <a href="mailto:slsharmakv04@gmail.com" style={{ color: 'var(--text-secondary)' }}>
+              Email
+            </a>
+            <button
+              type="button"
+              onClick={handleOpenResume}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: 'var(--text-secondary)',
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit'
+              }}
+            >
+              Resume (ATS)
+            </button>
+            <a 
+              href="#hero" 
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+              style={{ color: 'var(--accent-primary)', fontWeight: 500 }}
+            >
+              Back to Top ↑
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {Boolean(activeCaseId) && (
         <Suspense fallback={
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 17, 21, 0.9)', zIndex: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <span className="led-status cyan"></span>
+          <div style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(5, 7, 10, 0.9)', 
+            zIndex: 100, 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center' 
+          }}>
+            <div style={{ 
+              width: '32px', 
+              height: '32px', 
+              border: '2px solid rgba(245, 158, 11, 0.2)', 
+              borderTopColor: 'var(--accent-primary)', 
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite'
+            }} />
+            <style>{`
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
           </div>
         }>
           <CaseStudyOverlay 
-            id={currentHash.replace('#/case/', '')} 
+            id={activeCaseId} 
             onClose={handleCloseOverlay} 
           />
         </Suspense>
       )}
+
+      {/* Floating Back to Top Button (visible past hero) */}
+      <BackToTop />
+
+      {/* Floating Gemini AI Engineering Copilot */}
+      <GeminiChatbot />
+
+      {/* In-Browser Interactive Resume Viewer */}
+      <ResumeViewer 
+        isOpen={isResumeOpen} 
+        onClose={handleCloseResume} 
+      />
     </LazyMotion>
   );
 }

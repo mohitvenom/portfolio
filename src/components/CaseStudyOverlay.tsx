@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { m, AnimatePresence } from 'motion/react';
-import { X, ArrowUpRight, Terminal } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, AlertTriangle, Box, GitBranch } from 'lucide-react';
 import { content } from '../data/content';
 import { start, stop } from '../utils/lenis';
 import { CaseStudyDiagram } from './CaseStudyDiagram';
+import { Isometric3DPipeline } from './Isometric3DPipeline';
 
 interface CaseStudyOverlayProps {
   id: string | null;
@@ -25,33 +26,33 @@ const parseHardProblem = (text: string) => {
   return null;
 };
 
-const SectionHeading = ({ num, text }: { num: string, text: string }) => (
-  <h3 style={{ 
-    color: 'var(--accent-amber)', 
-    fontSize: '0.875rem', 
-    fontFamily: 'var(--font-mono)', 
-    marginBottom: 'var(--spacing-4)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  }}>
-    [{num}] {text}
-  </h3>
-);
-
-const Paragraph = ({ children }: { children: React.ReactNode }) => (
-  <p style={{ 
-    fontSize: '1.125rem', 
-    lineHeight: 1.7, 
-    color: 'var(--text-primary)',
-    maxWidth: '750px' 
-  }}>
-    {children}
-  </p>
+const ChapterHeading = ({ num, title }: { num: string; title: string }) => (
+  <div style={{ marginBottom: 'var(--space-3)' }}>
+    <div style={{ 
+      fontSize: '0.75rem', 
+      fontWeight: 600, 
+      color: 'var(--accent-primary)', 
+      textTransform: 'uppercase', 
+      letterSpacing: '0.04em' 
+    }}>
+      {num}.
+    </div>
+    <h3 style={{ 
+      fontSize: '1.25rem', 
+      fontWeight: 700, 
+      color: 'var(--text-primary)', 
+      letterSpacing: '-0.02em',
+      marginTop: '2px'
+    }}>
+      {title}
+    </h3>
+  </div>
 );
 
 export default function CaseStudyOverlay({ id, onClose }: CaseStudyOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const [diagramView, setDiagramView] = useState<'3d' | '2d'>('3d');
   
   const project = content.projects.find(p => p.id === id);
 
@@ -91,182 +92,312 @@ export default function CaseStudyOverlay({ id, onClose }: CaseStudyOverlayProps)
       <div 
         style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0,
           zIndex: 100,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: 'var(--spacing-4)',
+          padding: '1.5rem',
         }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
       >
-        {/* Backdrop */}
+        {/* Measured Backdrop Scrim */}
         <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           style={{
             position: 'absolute',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(10, 10, 12, 0.95)',
-            backdropFilter: 'blur(12px)'
+            inset: 0,
+            background: 'rgba(5, 7, 10, 0.88)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            cursor: 'pointer'
           }}
         />
 
-        {/* Content */}
+        {/* Modal Window */}
         <m.div
           ref={overlayRef}
-          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.98 }}
-          transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-          className="panel"
+          exit={{ opacity: 0, y: 24, scale: 0.98 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="architectural-card"
           data-lenis-prevent="true"
           style={{
             position: 'relative',
             width: '100%',
-            maxWidth: '1000px',
+            maxWidth: '920px',
             maxHeight: '90vh',
             overflowY: 'auto',
-            background: 'var(--bg-slate-900)',
-            padding: 'var(--spacing-8)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-medium)',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--space-8)',
             zIndex: 101,
             display: 'flex',
             flexDirection: 'column',
-            gap: 'var(--spacing-12)',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            gap: 'var(--space-8)',
+            boxShadow: 'var(--shadow-overlay)'
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <button
-            ref={closeBtnRef}
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="hardware-btn"
-            style={{ position: 'absolute', top: 'var(--spacing-6)', right: 'var(--spacing-6)' }}
-          >
-            <X size={20} />
-          </button>
-
-          <header style={{ maxWidth: '800px', paddingRight: 'var(--spacing-12)' }}>
-            <span style={{ color: 'var(--status-cyan)', fontSize: '0.875rem', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: 'var(--spacing-3)' }}>
-              // CASE STUDY
-            </span>
-            <h2 id="dialog-title" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, color: 'var(--text-primary)' }}>
-              {project.title}
-            </h2>
-          </header>
-
-          <section>
-            <SectionHeading num="01" text="Overview" />
-            <Paragraph>{caseStudy.approach}</Paragraph>
-          </section>
-
-          <section>
-            <SectionHeading num="02" text="Problem" />
-            <Paragraph>{caseStudy.problem}</Paragraph>
-          </section>
-
-          <section>
-            <SectionHeading num="03" text="Architecture" />
-            <div style={{ marginBottom: 'var(--spacing-6)', padding: 'var(--spacing-6)', background: 'var(--bg-slate-800)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-              <CaseStudyDiagram id={project.id} />
+          {/* Header Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            paddingBottom: 'var(--space-6)',
+            borderBottom: '1px solid var(--border-subtle)',
+            gap: '1.5rem'
+          }}>
+            <div>
+              <div style={{ 
+                fontSize: '0.75rem', 
+                color: 'var(--accent-primary)', 
+                fontWeight: 600, 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.04em',
+                marginBottom: '0.35rem'
+              }}>
+                Architectural Case Study · {project.category}
+              </div>
+              <h2 id="dialog-title" style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
+                {project.title}
+              </h2>
             </div>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--text-secondary)', maxWidth: '750px', lineHeight: 1.6 }}>
+
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+              aria-label="Close dialog"
+              className="btn-secondary"
+              style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Chapter 01: System Overview & Approach */}
+          <section>
+            <ChapterHeading num="01" title="Overview & Operational Scope" />
+            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: 'var(--text-secondary)', margin: 0 }}>
+              {caseStudy.approach}
+            </p>
+          </section>
+
+          {/* Chapter 02: Problem Definition */}
+          <section>
+            <ChapterHeading num="02" title="Architectural Problem Statement" />
+            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: 'var(--text-secondary)', margin: 0 }}>
+              {caseStudy.problem}
+            </p>
+          </section>
+
+          {/* Chapter 03: Topology Diagram */}
+          <section>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: 'var(--space-3)' }}>
+              <ChapterHeading num="03" title="Component Topology & Data Flow" />
+              <div className="filter-segmented-bar" style={{ padding: '3px' }}>
+                <button
+                  type="button"
+                  onClick={() => setDiagramView('3d')}
+                  className={`filter-tab-button ${diagramView === '3d' ? 'active' : ''}`}
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <Box size={13} />
+                  <span>3D Isometric Simulation</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDiagramView('2d')}
+                  className={`filter-tab-button ${diagramView === '2d' ? 'active' : ''}`}
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <GitBranch size={13} />
+                  <span>2D Directional Flow</span>
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              padding: diagramView === '3d' ? '0' : 'var(--space-6)',
+              background: 'var(--bg-canvas)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              marginBottom: 'var(--space-4)',
+              overflow: 'hidden'
+            }}>
+              {diagramView === '3d' ? (
+                <Isometric3DPipeline id={project.id} />
+              ) : (
+                <CaseStudyDiagram id={project.id} />
+              )}
+            </div>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', margin: 0 }}>
               {caseStudy.architecture}
             </p>
           </section>
 
+          {/* Chapter 04: Key Engineering Decisions */}
           <section>
-            <SectionHeading num="04" text="Key Engineering Decisions" />
+            <ChapterHeading num="04" title="Strategic Engineering Trade-Offs" />
             {Array.isArray(caseStudy.keyDecisions) ? (
-              <ul style={{ fontSize: '1.125rem', lineHeight: 1.7, color: 'var(--text-primary)', maxWidth: '750px', paddingLeft: 'var(--spacing-6)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
                 {caseStudy.keyDecisions.map((desc, i) => (
-                  <li key={i} style={{ marginBottom: 'var(--spacing-2)' }}>{desc}</li>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-primary)', marginTop: '0.55rem', flexShrink: 0 }} />
+                    <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>{desc}</p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <Paragraph>{caseStudy.keyDecisions}</Paragraph>
+              <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: 'var(--text-secondary)', margin: 0 }}>
+                {caseStudy.keyDecisions}
+              </p>
             )}
           </section>
 
+          {/* Chapter 05: The Hard Problem / Incident Debugging */}
           <section>
-            <SectionHeading num="05" text="Hard Problem / Debugging Story" />
+            <ChapterHeading num="05" title="Production Hardening & Bug Diagnosis" />
             {parsedHardProblem ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', maxWidth: '750px' }}>
-                <div>
-                  <span style={{ color: 'var(--status-cyan)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', display: 'block', marginBottom: 'var(--spacing-2)' }}>[ ISSUE ]</span>
-                  <p style={{ fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>{parsedHardProblem.issue}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                <div style={{ 
+                  padding: 'var(--space-4)', 
+                  borderRadius: 'var(--radius-md)', 
+                  background: 'var(--bg-muted)', 
+                  border: '1px solid var(--border-subtle)' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                    <AlertTriangle size={14} color="var(--accent-primary)" />
+                    <span>The Production Anomaly</span>
+                  </div>
+                  <p style={{ fontSize: '0.9375rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
+                    {parsedHardProblem.issue}
+                  </p>
                 </div>
-                <div>
-                  <span style={{ color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', display: 'block', marginBottom: 'var(--spacing-2)' }}>[ ROOT CAUSE ]</span>
-                  <p style={{ fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>{parsedHardProblem.rootCause}</p>
+
+                <div style={{ 
+                  padding: 'var(--space-4)', 
+                  borderRadius: 'var(--radius-md)', 
+                  background: 'var(--bg-muted)', 
+                  border: '1px solid var(--border-subtle)' 
+                }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-primary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                    Root Cause Analysis
+                  </div>
+                  <p style={{ fontSize: '0.9375rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
+                    {parsedHardProblem.rootCause}
+                  </p>
                 </div>
-                <div style={{ background: 'rgba(0, 229, 255, 0.05)', borderLeft: '2px solid var(--status-cyan)', padding: 'var(--spacing-4)' }}>
-                  <span style={{ color: 'var(--status-cyan)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', display: 'block', marginBottom: 'var(--spacing-2)' }}>[ FIX ]</span>
-                  <p style={{ fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>{parsedHardProblem.fix}</p>
+
+                <div style={{ 
+                  padding: 'var(--space-4)', 
+                  borderRadius: 'var(--radius-md)', 
+                  background: 'var(--accent-soft)', 
+                  border: '1px solid var(--accent-border)' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                    <CheckCircle2 size={14} />
+                    <span>Permanent Resolution & Hardening</span>
+                  </div>
+                  <p style={{ fontSize: '0.9375rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
+                    {parsedHardProblem.fix}
+                  </p>
                 </div>
               </div>
             ) : (
-              <div style={{ background: 'rgba(255, 176, 0, 0.05)', borderLeft: '2px solid var(--accent-amber)', padding: 'var(--spacing-4)', maxWidth: '750px' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', lineHeight: 1.6 }}>{caseStudy.hardProblems}</p>
-              </div>
+              <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                {caseStudy.hardProblems}
+              </p>
             )}
           </section>
 
+          {/* Chapter 06: Verified Outcomes */}
           <section>
-            <SectionHeading num="06" text="Outcome" />
-            <div style={{ maxWidth: '750px' }}>
-              {Array.isArray(caseStudy.outcome) ? (
-                <ul style={{ fontSize: '1.125rem', lineHeight: 1.7, color: 'var(--text-primary)', paddingLeft: 'var(--spacing-6)' }}>
-                  {caseStudy.outcome.map((item, i) => (
-                    <li key={i} style={{ marginBottom: 'var(--spacing-2)' }}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p style={{ fontSize: '1.25rem', color: 'var(--status-cyan)', lineHeight: 1.6 }}>{caseStudy.outcome}</p>
-              )}
-            </div>
+            <ChapterHeading num="06" title="Verified Outcomes & Metrics" />
+            {Array.isArray(caseStudy.outcome) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                {caseStudy.outcome.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                    <CheckCircle2 size={18} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span style={{ fontSize: '1rem', color: 'var(--text-primary)', lineHeight: 1.6 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: '1.0625rem', color: 'var(--accent-primary)', fontWeight: 600, margin: 0 }}>
+                {caseStudy.outcome}
+              </p>
+            )}
           </section>
 
-          <section>
-            <SectionHeading num="07" text="Tech Stack" />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', maxWidth: '750px' }}>
-              {caseStudy.stack.map(s => (
-                <span key={s} style={{ fontSize: '0.875rem', fontFamily: 'var(--font-mono)', padding: '6px 12px', background: 'var(--bg-slate-800)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                  {s}
+          {/* Chapter 07: Stack & Links */}
+          <section style={{ paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '0.5rem' }}>
+                  Technologies Utilized
                 </span>
-              ))}
-            </div>
-          </section>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {caseStudy.stack.map(s => (
+                    <span 
+                      key={s} 
+                      style={{ 
+                        fontSize: '0.8125rem', 
+                        fontFamily: 'var(--font-mono)', 
+                        padding: '4px 8px', 
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-muted)', 
+                        border: '1px solid var(--border-subtle)', 
+                        color: 'var(--text-secondary)' 
+                      }}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-          <section>
-            <SectionHeading num="08" text="Links" />
-            <div style={{ display: 'flex', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
               {caseStudy.links && caseStudy.links.length > 0 ? (
-                caseStudy.links.map(link => (
-                  <a key={link.text} href={link.url} target="_blank" rel="noreferrer" className="hardware-btn primary" style={{ padding: 'var(--spacing-3) var(--spacing-6)' }}>
-                    <Terminal size={16} />
-                    {link.text}
-                    <ArrowUpRight size={16} />
-                  </a>
-                ))
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  {caseStudy.links.map(link => (
+                    <a 
+                      key={link.text} 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="btn-primary"
+                      style={{ padding: '0.625rem 1rem' }}
+                    >
+                      <span>Repository on {link.text}</span>
+                      <ExternalLink size={15} />
+                    </a>
+                  ))}
+                </div>
               ) : (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                  Internal project — no public links available.
-                </p>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                  Internal Ubuy Production System
+                </span>
               )}
             </div>
           </section>
-          
-          {(caseStudy as any).note && (
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: 'var(--spacing-4)', fontFamily: 'var(--font-mono)', maxWidth: '750px' }}>
-              // {(caseStudy as any).note}
-            </p>
-          )}
         </m.div>
       </div>
     </AnimatePresence>

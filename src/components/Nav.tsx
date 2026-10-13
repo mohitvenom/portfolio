@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { content } from '../data/content';
 import { scrollTo } from '../utils/lenis';
-import { Terminal, Menu, X } from 'lucide-react';
+import { Download, Menu, X, FileText } from 'lucide-react';
 import { m, AnimatePresence } from 'motion/react';
 
-export const Nav = () => {
+interface NavProps {
+  onOpenResume?: () => void;
+}
+
+export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -18,7 +22,13 @@ export const Nav = () => {
     };
     
     const handleClickOutside = (e: MouseEvent) => {
-      if (isMenuOpen && menuRef.current && !menuRef.current.contains(e.target as Node) && toggleRef.current && !toggleRef.current.contains(e.target as Node)) {
+      if (
+        isMenuOpen && 
+        menuRef.current && 
+        !menuRef.current.contains(e.target as Node) && 
+        toggleRef.current && 
+        !toggleRef.current.contains(e.target as Node)
+      ) {
         setIsMenuOpen(false);
       }
     };
@@ -34,106 +44,247 @@ export const Nav = () => {
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault();
     setIsMenuOpen(false);
-    scrollTo(target, { offset: -73 });
+    scrollTo(target, { offset: -80 });
   };
 
   return (
-    <>
-      <nav style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(15, 17, 21, 0.8)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: 'var(--panel-border)',
-        padding: 'var(--spacing-4) var(--spacing-6)',
+    <header style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+      background: 'rgba(9, 11, 16, 0.85)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: '1px solid var(--border-subtle)',
+      width: '100%',
+    }}>
+      <div style={{
+        maxWidth: '1280px',
+        margin: '0 auto',
+        padding: '0 1.5rem',
+        height: '68px',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        gap: '2rem'
       }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 'var(--spacing-2)', 
-          fontFamily: 'var(--font-mono)', 
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}>
-          <Terminal size={18} color="var(--accent-amber)" style={{ flexShrink: 0 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>MOHIT SHARMA // AI ENGINEER</span>
-        </div>
+        {/* Zone 1: Single text element Brand Wordmark */}
+        <a 
+          href="#hero" 
+          onClick={(e) => handleScroll(e, '#hero')}
+          style={{ 
+            fontSize: '1.0625rem', 
+            fontWeight: 700, 
+            letterSpacing: '-0.02em', 
+            color: 'var(--text-primary)',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <span>Mohit Sharma</span>
+          <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.875rem' }}>/ AI Engineer</span>
+        </a>
         
-        <div style={{ display: 'flex', gap: 'var(--spacing-6)', alignItems: 'center' }}>
-          {/* Desktop Links */}
-          <div className="hide-on-mobile" style={{ display: 'flex', gap: 'var(--spacing-6)' }}>
-            <a href="#hero" onClick={(e) => handleScroll(e, '#hero')} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>// HERO</a>
-            <a href="#projects" onClick={(e) => handleScroll(e, '#projects')} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>// PROJECTS</a>
-            <a href="#skills" onClick={(e) => handleScroll(e, '#skills')} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>// SKILLS</a>
-            <a href="#contact" onClick={(e) => handleScroll(e, '#contact')} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>// CONTACT</a>
-          </div>
-          
-          <a href={content.personal.resumeUrl} download className="hardware-btn primary hide-on-mobile" style={{ marginLeft: 'var(--spacing-4)' }}>
-            <span className="led-status amber"></span>
-            Resume_PDF
+        {/* Zone 2: 4-5 concise single-line nav links */}
+        <nav 
+          style={{ display: 'none' }}
+          className="desktop-nav"
+          aria-label="Main Navigation"
+        >
+          <style>{`
+            @media (min-width: 820px) {
+              .desktop-nav { display: flex !important; align-items: center; gap: 2rem; }
+            }
+          `}</style>
+          <a 
+            href="#projects" 
+            onClick={(e) => handleScroll(e, '#projects')} 
+            style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Selected Systems
           </a>
+          <a 
+            href="#sandbox" 
+            onClick={(e) => handleScroll(e, '#sandbox')} 
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--accent-primary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Agent Sandbox
+          </a>
+          <a 
+            href="#specimen" 
+            onClick={(e) => handleScroll(e, '#specimen')} 
+            style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Architecture
+          </a>
+          <a 
+            href="#skills" 
+            onClick={(e) => handleScroll(e, '#skills')} 
+            style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Engineering Matrix
+          </a>
+          <a 
+            href="#experience" 
+            onClick={(e) => handleScroll(e, '#experience')} 
+            style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Trajectory
+          </a>
+          <a 
+            href="#contact" 
+            onClick={(e) => handleScroll(e, '#contact')} 
+            style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            className="nav-link"
+          >
+            Connect
+          </a>
+        </nav>
+        
+        {/* Zone 3: 1 primary action */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          {onOpenResume ? (
+            <button
+              type="button"
+              onClick={onOpenResume}
+              className="btn-primary"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer', border: 'none' }}
+              title="Open Interactive ATS-Optimized Resume"
+            >
+              <FileText size={15} />
+              <span>Resume</span>
+            </button>
+          ) : (
+            <a 
+              href={content.personal.resumeUrl} 
+              download="Mohit_Sharma_Resume.pdf"
+              className="btn-primary" 
+              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+            >
+              <Download size={15} />
+              <span>Resume</span>
+            </a>
+          )}
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle Button */}
           <button 
             ref={toggleRef}
-            className="hardware-btn" 
-            style={{ display: 'none' }} // Hidden by default, shown via CSS class for mobile
+            className="mobile-toggle-btn"
+            style={{ 
+              display: 'none',
+              background: 'transparent',
+              border: '1px solid var(--border-medium)',
+              color: 'var(--text-primary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.5rem',
+              cursor: 'pointer'
+            }}
             aria-label="Toggle Menu"
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <style>{`
-              @media (max-width: 768px) {
-                button[aria-label="Toggle Menu"] { display: flex !important; }
+              @media (max-width: 819px) {
+                .mobile-toggle-btn { display: flex !important; align-items: center; justify-content: center; }
               }
             `}</style>
-            {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
-      </nav>
+      </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Dropdown */}
       <AnimatePresence>
         {isMenuOpen && (
           <m.div
             id="mobile-menu"
             ref={menuRef}
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
             style={{
-              position: 'fixed',
-              top: '73px', // approx nav height
+              position: 'absolute',
+              top: '68px',
               left: 0,
               width: '100%',
-              background: 'var(--bg-slate-800)',
-              borderBottom: 'var(--panel-border)',
-              padding: 'var(--spacing-6)',
-              zIndex: 49,
+              background: 'var(--bg-surface)',
+              borderBottom: '1px solid var(--border-subtle)',
+              padding: '1.5rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: 'var(--spacing-4)'
+              gap: '1rem',
+              boxShadow: 'var(--shadow-overlay)'
             }}
           >
-            <a href="#hero" onClick={(e) => handleScroll(e, '#hero')} style={{ fontFamily: 'var(--font-mono)', padding: 'var(--spacing-3)' }}>// HERO</a>
-            <a href="#projects" onClick={(e) => handleScroll(e, '#projects')} style={{ fontFamily: 'var(--font-mono)', padding: 'var(--spacing-3)' }}>// PROJECTS</a>
-            <a href="#skills" onClick={(e) => handleScroll(e, '#skills')} style={{ fontFamily: 'var(--font-mono)', padding: 'var(--spacing-3)' }}>// SKILLS</a>
-            <a href="#contact" onClick={(e) => handleScroll(e, '#contact')} style={{ fontFamily: 'var(--font-mono)', padding: 'var(--spacing-3)' }}>// CONTACT</a>
-            
-            <a href={content.personal.resumeUrl} download onClick={() => setIsMenuOpen(false)} className="hardware-btn primary" style={{ marginTop: 'var(--spacing-4)' }}>
-              <span className="led-status amber"></span>
-              Download Resume
+            <a 
+              href="#projects" 
+              onClick={(e) => handleScroll(e, '#projects')} 
+              style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
+            >
+              Selected Systems
             </a>
+            <a 
+              href="#sandbox" 
+              onClick={(e) => handleScroll(e, '#sandbox')} 
+              style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--accent-primary)', padding: '0.5rem 0' }}
+            >
+              Agent Sandbox
+            </a>
+            <a 
+              href="#specimen" 
+              onClick={(e) => handleScroll(e, '#specimen')} 
+              style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
+            >
+              Architecture
+            </a>
+            <a 
+              href="#skills" 
+              onClick={(e) => handleScroll(e, '#skills')} 
+              style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
+            >
+              Engineering Matrix
+            </a>
+            <a 
+              href="#experience" 
+              onClick={(e) => handleScroll(e, '#experience')} 
+              style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
+            >
+              Trajectory
+            </a>
+            <a 
+              href="#contact" 
+              onClick={(e) => handleScroll(e, '#contact')} 
+              style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
+            >
+              Connect
+            </a>
+            {onOpenResume && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenResume();
+                }}
+                className="btn-primary"
+                style={{ marginTop: '0.5rem', justifyContent: 'center' }}
+              >
+                <FileText size={15} />
+                <span>Interactive Resume</span>
+              </button>
+            )}
           </m.div>
         )}
       </AnimatePresence>
-    </>
+    </header>
   );
 };

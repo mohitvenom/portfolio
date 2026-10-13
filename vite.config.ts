@@ -5,7 +5,6 @@ import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/portfolio/',
   plugins: [
     react(),
     visualizer({
@@ -14,4 +13,9 @@ export default defineConfig({
       brotliSize: true,
     })
   ],
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    allowedHosts: true,
+  },
 })

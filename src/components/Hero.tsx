@@ -1,452 +1,428 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { m } from 'motion/react';
 import { content } from '../data/content';
 import { scrollTo } from '../utils/lenis';
-import { Download, ArrowDown } from 'lucide-react';
-
-// Ref to communicate scrambling state without React re-renders
-const scramblingRef = { current: true };
-
-// Decrypt Text Animation Component
-const DecryptText = ({ text }: { text: string }) => {
-  const [displayText, setDisplayText] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return text;
-    }
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-    return text.split('').map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-  });
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      scramblingRef.current = false;
-      return;
-    }
-
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-    let iteration = 0;
-    let animationFrameId: number;
-    let lastTime = performance.now();
-
-    const animate = (time: number) => {
-      const elapsed = time - lastTime;
-      
-      // Throttle updates to ~100ms
-      if (elapsed > 100) {
-        lastTime = time;
-        setDisplayText(text.split('').map((_, index) => {
-          if (index < iteration) {
-            return text[index];
-          }
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join(''));
-
-        // Advance 3 characters per tick to finish in ~1.8s
-        iteration += 3;
-      }
-
-      if (iteration < text.length) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setDisplayText(text);
-        scramblingRef.current = false;
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [text]);
-
-  return (
-    <span style={{ position: 'relative', display: 'inline-block' }}>
-      {/* Real text for layout reservation (avoids CLS) */}
-      <span style={{ visibility: 'hidden', whiteSpace: 'pre-wrap' }}>{text}</span>
-      
-      {/* Real text for screen readers */}
-      <span className="sr-only" style={{ 
-        position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', 
-        overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', borderWidth: 0 
-      }}>
-        {text}
-      </span>
-      {/* Animated text for sighted users (absolute to avoid CLS) */}
-      <span aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, whiteSpace: 'pre-wrap' }}>
-        {displayText || text}
-      </span>
-    </span>
-  );
-};
-
-// Neural Network Canvas Background
-const NeuralCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [fps, setFps] = useState(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const showFps = import.meta.env.DEV && new URLSearchParams(window.location.search).get('fps') === '1';
-    let frameCount = 0;
-    let lastTime = performance.now();
-
-    // Respect reduced motion - do not render animation
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR at 2
-    
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-
-    // Reduce nodes on mobile
-    const isMobile = width < 768;
-    const numNodes = isMobile ? 30 : 40;
-    
-    interface Node {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-    }
-
-    const nodes: Node[] = Array.from({ length: numNodes }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-    }));
-
-    let mouseX = -1000;
-    let mouseY = -1000;
-    let isVisible = document.visibilityState === 'visible';
-    let isIntersecting = true;
-    let animationId: number;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    };
-
-    const handleMouseLeave = () => {
-      mouseX = -1000;
-      mouseY = -1000;
-    };
-
-    const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx.scale(dpr, dpr);
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        draw(true); // Redraw static frame on resize
-      }
-    };
-
-    const handleVisibility = () => {
-      isVisible = document.visibilityState === 'visible';
-      if (isVisible && isIntersecting && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        if (!animationId) animationId = requestAnimationFrame(() => draw());
-      }
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      isIntersecting = entries[0].isIntersecting;
-      if (isIntersecting && isVisible && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        if (!animationId) animationId = requestAnimationFrame(() => draw());
-      }
-    });
-    observer.observe(canvas);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    // Use a spatial grid to optimize collision/edges if node count is high,
-    // but 70 nodes is 4900 checks max, well under the ~30k budget for 60fps on low-end.
-    
-    const draw = (staticFrame = false) => {
-      if ((!isVisible || !isIntersecting) && !staticFrame) {
-        animationId = 0;
-        return; // Pause loop
-      }
-
-      ctx.clearRect(0, 0, width, height);
-      
-      const connectDistance = 100;
-      const mouseInfluence = 200;
-
-      // During text scramble, drastically reduce nodes to prevent main thread contention (Lighthouse TBT)
-      const activeNodeCount = scramblingRef.current ? 5 : nodes.length;
-
-      // Update and draw nodes
-      for (let i = 0; i < activeNodeCount; i++) {
-        const node = nodes[i];
-
-        const dxMouse = mouseX - node.x;
-        const dyMouse = mouseY - node.y;
-        const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-
-        if (!staticFrame) {
-          // Cursor attraction
-          if (distMouse < mouseInfluence) {
-            const force = (mouseInfluence - distMouse) / mouseInfluence;
-            node.vx += (dxMouse / distMouse) * force * 0.05;
-            node.vy += (dyMouse / distMouse) * force * 0.05;
-          }
-
-          // Friction and limit speed
-          node.vx *= 0.98;
-          node.vy *= 0.98;
-          
-          // Base drift
-          node.vx += (Math.random() - 0.5) * 0.02;
-          node.vy += (Math.random() - 0.5) * 0.02;
-
-          node.x += node.vx;
-          node.y += node.vy;
-
-          // Bounce
-          if (node.x < 0 || node.x > width) node.vx *= -1;
-          if (node.y < 0 || node.y > height) node.vy *= -1;
-        }
-
-        // Draw node
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
-        
-        // Brighten if near mouse
-        if (!staticFrame && distMouse < mouseInfluence) {
-          ctx.fillStyle = 'rgba(255, 176, 0, 0.8)';
-        } else {
-          ctx.fillStyle = 'rgba(0, 229, 255, 0.4)';
-        }
-        
-        ctx.fill();
-
-        // Connect edges
-        for (let j = i + 1; j < activeNodeCount; j++) {
-          const other = nodes[j];
-          const dx = other.x - node.x;
-          const dy = other.y - node.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < connectDistance) {
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(other.x, other.y);
-            
-            const opacity = 1 - (dist / connectDistance);
-            
-            // Highlight edge if both nodes are near cursor
-            if (!staticFrame) {
-              const otherDistMouse = Math.sqrt(Math.pow(mouseX - other.x, 2) + Math.pow(mouseY - other.y, 2));
-              if (distMouse < mouseInfluence && otherDistMouse < mouseInfluence) {
-                ctx.strokeStyle = `rgba(255, 176, 0, ${opacity * 0.5})`;
-              } else {
-                ctx.strokeStyle = `rgba(0, 229, 255, ${opacity * 0.15})`;
-              }
-            } else {
-              ctx.strokeStyle = `rgba(0, 229, 255, ${opacity * 0.15})`;
-            }
-            
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      }
-
-      if (showFps && !staticFrame) {
-        frameCount++;
-        const now = performance.now();
-        if (now - lastTime >= 1000) {
-          setFps(Math.round((frameCount * 1000) / (now - lastTime)));
-          frameCount = 0;
-          lastTime = now;
-        }
-      }
-
-      if (!staticFrame) {
-        animationId = requestAnimationFrame(() => draw());
-      } else {
-        animationId = 0;
-      }
-    };
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      draw(true); // Draw static frame once
-    } else {
-      draw(); // Start loop
-    }
-
-    return () => {
-      if (animationId) cancelAnimationFrame(animationId);
-      observer.disconnect();
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-  }, []);
-
-  return (
-    <>
-      <canvas
-        ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 0,
-        opacity: 0.6
-      }}
-      />
-      {import.meta.env.DEV && new URLSearchParams(window.location.search).get('fps') === '1' && (
-        <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.8)', padding: '5px', color: '#0f0', fontFamily: 'monospace', zIndex: 100 }}>
-          FPS: {fps}
-        </div>
-      )}
-    </>
-  );
-};
+import { ArrowDown, Download, ExternalLink, GitBranch, Layers, ShieldCheck, CheckCircle2, Box } from 'lucide-react';
+import { ThreeAgentTopology } from './ThreeAgentTopology';
 
 export const Hero = () => {
-  const skills = [
-    'Python', 'LLMs', 'LangGraph', 'MCP', 'FastAPI', 'NLP', 'PostgreSQL', 'Playwright'
-  ];
+  const [heroViewMode, setHeroViewMode] = useState<'3d' | 'spec'>('3d');
+  const [activeSpecimenTab, setActiveSpecimenTab] = useState<'graph' | 'mcp' | 'hardening'>('graph');
 
   return (
     <section id="hero" style={{ 
       position: 'relative', 
-      minHeight: '80vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      paddingTop: 'var(--spacing-16)',
-      paddingBottom: 'var(--spacing-16)'
+      paddingTop: 'var(--space-12)',
+      paddingBottom: 'var(--space-16)',
     }}>
-      <NeuralCanvas />
-      
-      <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
-        <m.div 
-          initial={{ opacity: 0, y: 20 }}
+      {/* Split-Screen Hero Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gap: 'var(--space-12)',
+        alignItems: 'center',
+        marginBottom: 'var(--space-16)'
+      }}>
+        {/* Left Column: Typographic Authority & Value Proposition */}
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
-          {/* Status Panel */}
-          <div className="panel" style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            gap: 'var(--spacing-3)',
-            padding: 'var(--spacing-2) var(--spacing-4)',
-            marginBottom: 'var(--spacing-6)',
-            border: '1px solid var(--status-cyan)',
-            background: 'rgba(0, 229, 255, 0.05)',
-            boxShadow: '0 0 10px rgba(0, 229, 255, 0.1)'
-          }}>
-            <span className="led-status cyan" style={{ boxShadow: '0 0 8px var(--status-cyan)' }}></span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--status-cyan)' }}>
-              {content.personal.status.text}
-            </span>
-          </div>
-
-          {/* Name / Role */}
+          {/* Quiet Unboxed Kicker */}
           <div style={{ 
-            fontFamily: 'var(--font-mono)', 
-            fontSize: 'clamp(1rem, 2vw, 1.25rem)', 
-            color: 'var(--accent-amber)',
-            marginBottom: 'var(--spacing-4)',
-            display: 'flex',
-            alignItems: 'center'
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            fontSize: '0.875rem',
+            color: 'var(--accent-primary)',
+            fontWeight: 600,
+            marginBottom: 'var(--space-4)'
           }}>
-            <span>&gt; {content.personal.name}, {content.personal.role}</span>
-            <m.span 
-              animate={{ opacity: [1, 0] }} 
-              transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-              style={{ 
-                display: 'inline-block', 
-                width: '10px', 
-                height: '1.2em', 
-                background: 'var(--accent-amber)',
-                marginLeft: '8px',
-                verticalAlign: 'middle'
-              }}
-            />
+            <span>AI Engineer</span>
+            <span style={{ color: 'var(--text-muted)' }} aria-hidden="true">·</span>
+            <span>Autonomous Systems & LLM Pipelines</span>
           </div>
 
           {/* Headline */}
           <h1 style={{ 
-            fontSize: 'clamp(2rem, 5vw, 4rem)', 
+            fontSize: 'clamp(2.5rem, 5vw, 3.85rem)', 
             lineHeight: 1.1, 
-            marginBottom: 'var(--spacing-4)',
-            maxWidth: '900px',
+            letterSpacing: '-0.03em',
+            marginBottom: 'var(--space-6)',
             color: 'var(--text-primary)'
           }}>
-            <DecryptText text={content.personal.tagline} />
+            Building autonomous systems that execute, reason & adapt.
           </h1>
 
-          {/* Supporting Description */}
+          {/* Lead Paragraph */}
           <p style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 'clamp(1rem, 1.5vw, 1.125rem)',
+            fontSize: '1.125rem',
+            lineHeight: 1.7,
             color: 'var(--text-secondary)',
-            marginBottom: 'var(--spacing-10)',
-            maxWidth: '700px',
-            lineHeight: 1.6
+            marginBottom: 'var(--space-8)',
+            maxWidth: '560px'
           }}>
-            {content.personal.supportingDescription}
+            AI Engineer at <strong>Ubuy Technologies</strong>. Specializing in multi-marketplace intelligence engines, Model Context Protocol (MCP) tool servers, sandboxed code-synthesis runtimes, and low-latency retrieval pipelines.
           </p>
 
-          {/* Skill Badges */}
+          {/* Primary Action Controls */}
           <div style={{ 
             display: 'flex', 
             flexWrap: 'wrap', 
-            gap: 'var(--spacing-3)', 
-            marginBottom: 'var(--spacing-10)',
-            maxWidth: '800px'
+            gap: 'var(--space-4)', 
+            alignItems: 'center',
+            marginBottom: 'var(--space-8)'
           }}>
-            {skills.map((skill, i) => (
-              <m.div 
-                key={skill}
-                className="hardware-btn"
-                style={{ cursor: 'default' }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + i * 0.05 }}
-              >
-                {skill}
-              </m.div>
-            ))}
+            <button 
+              className="btn-primary"
+              onClick={() => scrollTo('#projects', { offset: -80 })}
+            >
+              <span>Explore Selected Work</span>
+              <ArrowDown size={16} />
+            </button>
+            <a 
+              href={content.personal.resumeUrl} 
+              download="Mohit_Sharma_Resume.pdf"
+              className="btn-secondary"
+            >
+              <Download size={16} />
+              <span>Download Resume</span>
+            </a>
           </div>
 
-          {/* CTAs */}
-          <div style={{ display: 'flex', gap: 'var(--spacing-4)', flexWrap: 'wrap' }}>
-            <a href={content.personal.resumeUrl} download className="hardware-btn primary" style={{ padding: 'var(--spacing-3) var(--spacing-6)', fontSize: '1rem' }}>
-              <Download size={18} />
-              DOWNLOAD RESUME
+          {/* Quick Credential Links */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '1.25rem',
+            fontSize: '0.875rem',
+            color: 'var(--text-muted)'
+          }}>
+            <a 
+              href={content.personal.github} 
+              target="_blank" 
+              rel="noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--text-secondary)' }}
+              className="hover-accent"
+            >
+              <span>GitHub</span>
+              <ExternalLink size={13} />
             </a>
-            <a href="#projects" className="hardware-btn" style={{ padding: 'var(--spacing-3) var(--spacing-6)', fontSize: '1rem' }} onClick={(e) => {
-              e.preventDefault();
-              scrollTo('#projects', { offset: -73 });
+            <span aria-hidden="true">·</span>
+            <a 
+              href={content.personal.linkedin} 
+              target="_blank" 
+              rel="noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--text-secondary)' }}
+              className="hover-accent"
+            >
+              <span>LinkedIn</span>
+              <ExternalLink size={13} />
+            </a>
+            <span aria-hidden="true">·</span>
+            <span>Jaipur, India · Open to full-time roles</span>
+          </div>
+        </m.div>
+
+        {/* Right Column: 3D Autonomous Agent Specimen */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Mode Switcher */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+            <div className="filter-segmented-bar" style={{ padding: '3px' }}>
+              <button
+                type="button"
+                onClick={() => setHeroViewMode('3d')}
+                className={`filter-tab-button ${heroViewMode === '3d' ? 'active' : ''}`}
+                style={{ padding: '4px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+              >
+                <Box size={13} />
+                <span>3D Agent Mesh</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeroViewMode('spec')}
+                className={`filter-tab-button ${heroViewMode === 'spec' ? 'active' : ''}`}
+                style={{ padding: '4px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
+              >
+                <GitBranch size={13} />
+                <span>Protocol Breakdown</span>
+              </button>
+            </div>
+          </div>
+
+          {heroViewMode === '3d' ? (
+            <ThreeAgentTopology />
+          ) : (
+            <m.div
+              id="specimen"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="architectural-card"
+              style={{
+                padding: 'var(--space-6)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-xl)',
+                boxShadow: 'var(--shadow-overlay)',
+              }}
+            >
+          {/* Card Top Strip */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: 'var(--space-4)',
+            borderBottom: '1px solid var(--border-subtle)',
+            marginBottom: 'var(--space-4)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '0.02em' }}>
+                LIVE ARCHITECTURAL SPECIMEN
+              </span>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              v1.4 / Production
+            </span>
+          </div>
+
+          {/* Interactive Specimen Tabs */}
+          <div className="filter-segmented-bar" style={{ width: '100%', marginBottom: 'var(--space-5)' }}>
+            <button
+              onClick={() => setActiveSpecimenTab('graph')}
+              className={`filter-tab-button ${activeSpecimenTab === 'graph' ? 'active' : ''}`}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <GitBranch size={14} />
+              <span>LangGraph State</span>
+            </button>
+            <button
+              onClick={() => setActiveSpecimenTab('mcp')}
+              className={`filter-tab-button ${activeSpecimenTab === 'mcp' ? 'active' : ''}`}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Layers size={14} />
+              <span>MCP Protocol</span>
+            </button>
+            <button
+              onClick={() => setActiveSpecimenTab('hardening')}
+              className={`filter-tab-button ${activeSpecimenTab === 'hardening' ? 'active' : ''}`}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <ShieldCheck size={14} />
+              <span>Hardening</span>
+            </button>
+          </div>
+
+          {/* Tab 1: State Machine Pipeline */}
+          {activeSpecimenTab === 'graph' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                Autonomous state transitions executed by Inventory Intel Agent:
+              </div>
+
+              {[
+                { stage: '1. Cron Trigger', desc: 'APScheduler initiates marketplace scan job' },
+                { stage: '2. LangGraph Router', desc: 'Orchestrates tool invocation based on target vendor spec' },
+                { stage: '3. MCP Scraper Service', desc: 'Standardized tool call to Amazon / Ubuy / eBay parsers' },
+                { stage: '4. Diff & Checkpoint', desc: 'PostgreSQL historical delta check (price drop, stockout)' },
+                { stage: '5. Dispatcher', desc: 'Slack webhook notifications + Next.js dashboard stream' }
+              ].map((step, idx) => (
+                <div 
+                  key={step.stage}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    padding: '0.625rem 0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: idx === 2 ? 'var(--accent-soft)' : 'var(--bg-surface-elevated)',
+                    border: idx === 2 ? '1px solid var(--accent-border)' : '1px solid var(--border-subtle)',
+                  }}
+                >
+                  <span style={{ 
+                    fontFamily: 'var(--font-mono)', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 700, 
+                    color: idx === 2 ? 'var(--accent-primary)' : 'var(--text-muted)',
+                    minWidth: '18px'
+                  }}>
+                    0{idx + 1}
+                  </span>
+                  <div>
+                    <div style={{ 
+                      fontSize: '0.8125rem', 
+                      fontWeight: 600, 
+                      color: idx === 2 ? 'var(--accent-primary)' : 'var(--text-primary)' 
+                    }}>
+                      {step.stage}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      {step.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tab 2: MCP Tool Protocol */}
+          {activeSpecimenTab === 'mcp' && (
+            <div style={{ 
+              background: 'var(--bg-canvas)', 
+              borderRadius: 'var(--radius-md)', 
+              padding: '1rem',
+              border: '1px solid var(--border-subtle)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.5,
+              overflowX: 'auto'
             }}>
-              VIEW PROJECTS
-              <ArrowDown size={18} />
+              <div style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>
+                // Model Context Protocol (MCP) Tool Declaration
+              </div>
+              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{`@mcp.tool()
+async def scrape_marketplace_item(
+    url: str, 
+    marketplace: Literal["amazon", "ubuy", "ebay"]
+) -> ProductTelemetry:
+    """Standardized tool contract decoupled from LangGraph"""
+    session = await get_anti_detection_session()
+    raw_payload = await fetch_vendor_dom(session, url)
+    return parse_structured_pricing(raw_payload)`}</pre>
+            </div>
+          )}
+
+          {/* Tab 3: Engineering Hardening */}
+          {activeSpecimenTab === 'hardening' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ 
+                padding: '0.75rem', 
+                borderRadius: 'var(--radius-md)', 
+                background: 'var(--bg-surface-elevated)', 
+                border: '1px solid var(--border-subtle)' 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.8125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  <CheckCircle2 size={15} />
+                  <span>Token Budget Runaway Mitigation</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', margin: 0, color: 'var(--text-secondary)' }}>
+                  Patched coding agent state-transition leak that previously consumed 2–3K tokens per cycle without transitioning from Implementing to Validating.
+                </p>
+              </div>
+
+              <div style={{ 
+                padding: '0.75rem', 
+                borderRadius: 'var(--radius-md)', 
+                background: 'var(--bg-surface-elevated)', 
+                border: '1px solid var(--border-subtle)' 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.8125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  <CheckCircle2 size={15} />
+                  <span>Coverage-Weighted Semantic Scoring</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', margin: 0, color: 'var(--text-secondary)' }}>
+                  Replaced raw cosine max() pooling with entity coverage penalty, preventing 300-word low-effort snippets from out-scoring comprehensive 2,000-word guides.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Card Footer */}
+          <div style={{ 
+            marginTop: 'var(--space-5)', 
+            paddingTop: 'var(--space-3)', 
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)'
+          }}>
+            <span>Focus: LangGraph · MCP Python SDK · FastAPI</span>
+            <a 
+              href="#projects" 
+              onClick={(e) => {
+                e.preventDefault();
+                scrollTo('#projects', { offset: -80 });
+              }}
+              style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+            >
+              View System Specs →
             </a>
           </div>
         </m.div>
-      </div>
+      )}
+    </div>
+  </div>
+
+      {/* Full-Width Claim-to-Proof Metric Strip (Portfolio Reference Rule: Section 2.B) */}
+      <m.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 'var(--space-4)',
+          padding: 'var(--space-6)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-subtle)'
+        }}
+      >
+        <div>
+          <div className="font-tabular" style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1 }}>
+            3
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+            Live Marketplaces Tracked
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Amazon, Ubuy & eBay via MCP scraper tools
+          </div>
+        </div>
+
+        <div>
+          <div className="font-tabular" style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1 }}>
+            75%
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+            Decision Logic Test Coverage
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Hardened with comprehensive Pytest suites
+          </div>
+        </div>
+
+        <div>
+          <div className="font-tabular" style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1 }}>
+            65%
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+            LLM Inference Cost Reduction
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Via cascading BM25 + bi-encoder filtering
+          </div>
+        </div>
+
+        <div>
+          <div className="font-tabular" style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1 }}>
+            850ms
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+            Async Pipeline Latency
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Reduced down from 4.8s synchronous baseline
+          </div>
+        </div>
+      </m.div>
     </section>
   );
 };
