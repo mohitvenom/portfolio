@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { m, AnimatePresence } from 'motion/react';
-import { X, ExternalLink, CheckCircle2, AlertTriangle, Box, GitBranch } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { content } from '../data/content';
 import { start, stop } from '../utils/lenis';
 import { CaseStudyDiagram } from './CaseStudyDiagram';
-import { Isometric3DPipeline } from './Isometric3DPipeline';
 
 interface CaseStudyOverlayProps {
   id: string | null;
@@ -52,7 +51,6 @@ const ChapterHeading = ({ num, title }: { num: string; title: string }) => (
 export default function CaseStudyOverlay({ id, onClose }: CaseStudyOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const [diagramView, setDiagramView] = useState<'3d' | '2d'>('3d');
   
   const project = content.projects.find(p => p.id === id);
 
@@ -211,43 +209,16 @@ export default function CaseStudyOverlay({ id, onClose }: CaseStudyOverlayProps)
 
           {/* Chapter 03: Topology Diagram */}
           <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: 'var(--space-3)' }}>
-              <ChapterHeading num="03" title="Component Topology & Data Flow" />
-              <div className="filter-segmented-bar" style={{ padding: '3px' }}>
-                <button
-                  type="button"
-                  onClick={() => setDiagramView('3d')}
-                  className={`filter-tab-button ${diagramView === '3d' ? 'active' : ''}`}
-                  style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
-                >
-                  <Box size={13} />
-                  <span>3D Isometric Simulation</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDiagramView('2d')}
-                  className={`filter-tab-button ${diagramView === '2d' ? 'active' : ''}`}
-                  style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px' }}
-                >
-                  <GitBranch size={13} />
-                  <span>2D Directional Flow</span>
-                </button>
-              </div>
-            </div>
-
+            <ChapterHeading num="03" title="Component Topology & Data Flow" />
             <div style={{
-              padding: diagramView === '3d' ? '0' : 'var(--space-6)',
+              padding: 'var(--space-6)',
               background: 'var(--bg-canvas)',
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-subtle)',
               marginBottom: 'var(--space-4)',
               overflow: 'hidden'
             }}>
-              {diagramView === '3d' ? (
-                <Isometric3DPipeline id={project.id} />
-              ) : (
-                <CaseStudyDiagram id={project.id} />
-              )}
+              <CaseStudyDiagram id={project.id} />
             </div>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', margin: 0 }}>
               {caseStudy.architecture}

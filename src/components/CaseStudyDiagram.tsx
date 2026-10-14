@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Database, Zap, Cpu, Bell, Layers, CheckCircle2, ArrowRight, Box } from 'lucide-react';
-import { Isometric3DPipeline } from './Isometric3DPipeline';
+import { Database, Zap, Cpu, Bell, Layers, CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface CaseStudyDiagramProps {
   id: string;
@@ -26,36 +25,16 @@ interface NodeDetail {
 
 export const CaseStudyDiagram = ({ id }: CaseStudyDiagramProps) => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'iso3d' | 'flow' | 'steps'>('iso3d');
+  const [viewMode, setViewMode] = useState<'flow' | 'steps'>('flow');
 
   const renderToolbar = (stepCount?: number) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
         <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)' }} />
         <span>Directional Data Flow Topology</span>
       </div>
 
       <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--bg-muted)', padding: '3px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-        <button
-          type="button"
-          onClick={() => setViewMode('iso3d')}
-          style={{
-            background: viewMode === 'iso3d' ? 'var(--bg-surface)' : 'transparent',
-            color: viewMode === 'iso3d' ? 'var(--text-primary)' : 'var(--text-muted)',
-            border: 'none',
-            padding: '4px 10px',
-            borderRadius: '4px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <Box size={12} />
-          <span>3D Isometric</span>
-        </button>
         <button
           type="button"
           onClick={() => setViewMode('flow')}
@@ -91,15 +70,6 @@ export const CaseStudyDiagram = ({ id }: CaseStudyDiagramProps) => {
       </div>
     </div>
   );
-
-  if (viewMode === 'iso3d') {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {renderToolbar()}
-        <Isometric3DPipeline id={id} />
-      </div>
-    );
-  }
 
   // Specific diagrams per project
   if (id === 'inventory-intel-agent') {

@@ -1,14 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { content } from '../data/content';
 import { scrollTo } from '../utils/lenis';
-import { Download, Menu, X, FileText } from 'lucide-react';
+import { Download, Menu, X } from 'lucide-react';
 import { m, AnimatePresence } from 'motion/react';
 
-interface NavProps {
-  onOpenResume?: () => void;
-}
-
-export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
+export const Nav: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -108,14 +104,6 @@ export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
             Selected Systems
           </a>
           <a 
-            href="#sandbox" 
-            onClick={(e) => handleScroll(e, '#sandbox')} 
-            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--accent-primary)', whiteSpace: 'nowrap', flexShrink: 0 }}
-            className="nav-link"
-          >
-            Agent Sandbox
-          </a>
-          <a 
             href="#specimen" 
             onClick={(e) => handleScroll(e, '#specimen')} 
             style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}
@@ -151,28 +139,15 @@ export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
         
         {/* Zone 3: 1 primary action */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-          {onOpenResume ? (
-            <button
-              type="button"
-              onClick={onOpenResume}
-              className="btn-primary"
-              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer', border: 'none' }}
-              title="Open Interactive ATS-Optimized Resume"
-            >
-              <FileText size={15} />
-              <span>Resume</span>
-            </button>
-          ) : (
-            <a 
-              href={content.personal.resumeUrl} 
-              download="Mohit_Sharma_Resume.pdf"
-              className="btn-primary" 
-              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-            >
-              <Download size={15} />
-              <span>Resume</span>
-            </a>
-          )}
+          <a 
+            href={content.personal.resumeUrl} 
+            download="Mohit_Sharma_Resume.pdf"
+            className="btn-primary" 
+            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}
+          >
+            <Download size={15} />
+            <span>Resume</span>
+          </a>
 
           {/* Mobile Menu Toggle Button */}
           <button 
@@ -234,13 +209,6 @@ export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
               Selected Systems
             </a>
             <a 
-              href="#sandbox" 
-              onClick={(e) => handleScroll(e, '#sandbox')} 
-              style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--accent-primary)', padding: '0.5rem 0' }}
-            >
-              Agent Sandbox
-            </a>
-            <a 
               href="#specimen" 
               onClick={(e) => handleScroll(e, '#specimen')} 
               style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-primary)', padding: '0.5rem 0' }}
@@ -268,20 +236,16 @@ export const Nav: React.FC<NavProps> = ({ onOpenResume }) => {
             >
               Connect
             </a>
-            {onOpenResume && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onOpenResume();
-                }}
-                className="btn-primary"
-                style={{ marginTop: '0.5rem', justifyContent: 'center' }}
-              >
-                <FileText size={15} />
-                <span>Interactive Resume</span>
-              </button>
-            )}
+            <a
+              href={content.personal.resumeUrl}
+              download="Mohit_Sharma_Resume.pdf"
+              onClick={() => setIsMenuOpen(false)}
+              className="btn-primary"
+              style={{ marginTop: '0.5rem', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}
+            >
+              <Download size={15} />
+              <span>Download Resume</span>
+            </a>
           </m.div>
         )}
       </AnimatePresence>

@@ -3,6 +3,7 @@ import Lenis from 'lenis';
 import { frame, cancelFrame } from 'motion';
 import { LazyMotion, domAnimation } from 'motion/react';
 import { setLenis } from './utils/lenis';
+import { content } from './data/content';
 import { Nav } from './components/Nav';
 import { Hero } from './components/Hero';
 import { Projects } from './components/Projects';
@@ -10,11 +11,8 @@ import { SkillsAndExperience } from './components/SkillsAndExperience';
 import { ContactTerminal } from './components/ContactTerminal';
 import { StyleGuide } from './components/StyleGuide';
 import { SpatialBackground } from './components/SpatialBackground';
-import { GeminiChatbot } from './components/GeminiChatbot';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { BackToTop } from './components/BackToTop';
-import { AgentPlayground } from './components/AgentPlayground';
-import { ResumeViewer } from './components/ResumeViewer';
 
 const CaseStudyOverlay = lazy(() => import('./components/CaseStudyOverlay'));
 import './index.css';
@@ -31,17 +29,17 @@ function LazyRender({ children, minHeight = "100vh", id }: { children: React.Rea
       }
     }, { rootMargin: "300px 0px" });
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-    return () => observer.disconnect();
-  }, []);
+  if (ref.current) {
+    observer.observe(ref.current);
+  }
+  return () => observer.disconnect();
+}, []);
 
-  return (
-    <div id={id} ref={ref} style={{ minHeight: shouldRender ? 'auto' : minHeight, contentVisibility: shouldRender ? 'visible' : 'auto' }}>
-      {shouldRender ? children : null}
-    </div>
-  );
+return (
+  <div id={id} ref={ref} style={{ minHeight: shouldRender ? 'auto' : minHeight, contentVisibility: shouldRender ? 'visible' : 'auto' }}>
+    {shouldRender ? children : null}
+  </div>
+);
 }
 
 function App() {
@@ -82,9 +80,6 @@ function App() {
     }
     return null;
   });
-  const [isResumeOpen, setIsResumeOpen] = useState<boolean>(() => {
-    return typeof window !== 'undefined' && window.location.hash === '#/resume';
-  });
 
   useEffect(() => {
     const onHashChange = () => {
@@ -94,9 +89,6 @@ function App() {
         setActiveCaseId(hash.replace('#/case/', ''));
       } else {
         setActiveCaseId(null);
-      }
-      if (hash === '#/resume') {
-        setIsResumeOpen(true);
       }
     };
     window.addEventListener('hashchange', onHashChange);
@@ -129,42 +121,19 @@ function App() {
     }
   };
 
-  const handleOpenResume = () => {
-    setIsResumeOpen(true);
-    try {
-      window.location.hash = '#/resume';
-    } catch {
-      // ignore
-    }
-  };
-
-  const handleCloseResume = () => {
-    setIsResumeOpen(false);
-    try {
-      if (window.location.hash === '#/resume') {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    } catch {
-      window.location.hash = '';
-    }
-  };
-
   return (
     <LazyMotion features={domAnimation} strict>
       {/* Subtle fixed animated progress bar tracking scroll depth */}
       <ScrollProgressBar />
       <SpatialBackground />
       <a href="#main-content" className="skip-link sr-only focusable">Skip to content</a>
-      <Nav onOpenResume={handleOpenResume} />
+      <Nav />
       <main id="main-content" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem', width: '100%' }}>
         {currentHash === '#/styleguide' ? <StyleGuide /> : (
           <>
             <Hero />
             <LazyRender id="projects" minHeight="600px">
               <Projects onSelectProject={handleOpenCase} />
-            </LazyRender>
-            <LazyRender id="sandbox" minHeight="650px">
-              <AgentPlayground />
             </LazyRender>
             <LazyRender id="skills" minHeight="600px">
               <SkillsAndExperience />
@@ -211,21 +180,17 @@ function App() {
             <a href="mailto:slsharmakv04@gmail.com" style={{ color: 'var(--text-secondary)' }}>
               Email
             </a>
-            <button
-              type="button"
-              onClick={handleOpenResume}
+            <a
+              href={content.personal.resumeUrl}
+              download="Mohit_Sharma_Resume.pdf"
               style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
                 color: 'var(--text-secondary)',
                 fontSize: '0.8125rem',
-                cursor: 'pointer',
-                fontFamily: 'inherit'
+                textDecoration: 'none'
               }}
             >
-              Resume (ATS)
-            </button>
+              Resume (PDF)
+            </a>
             <a 
               href="#hero" 
               onClick={(e) => {
@@ -276,15 +241,6 @@ function App() {
 
       {/* Floating Back to Top Button (visible past hero) */}
       <BackToTop />
-
-      {/* Floating Gemini AI Engineering Copilot */}
-      <GeminiChatbot />
-
-      {/* In-Browser Interactive Resume Viewer */}
-      <ResumeViewer 
-        isOpen={isResumeOpen} 
-        onClose={handleCloseResume} 
-      />
     </LazyMotion>
   );
 }

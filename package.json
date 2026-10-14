@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
-    "start": "tsx server.ts",
+    "dev": "vite",
+    "start": "vite",
     "build": "node scripts/check-pdf.js && node scripts/generate-seo.js && node scripts/audit.js && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0 --port 3000",
